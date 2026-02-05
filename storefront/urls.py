@@ -17,7 +17,7 @@ from django.contrib import admin
 from django.urls import path, include
 import debug_toolbar
 
-admin.site.site_header = 'Storefront Admin'
+admin.site.site_header = 'Storefront Admin + GM Assistant'
 admin.site.index_title = 'Admin'
 
 urlpatterns = [
