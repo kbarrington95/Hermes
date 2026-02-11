@@ -4,5 +4,6 @@ from . import views
 
 # URLConf
 urlpatterns = [
-    path('campaigns/', views.campaign_list)
+    path('campaigns/', views.CampaignList.as_view()),
+    path('campaigns/<int:id>', views.campaign_detail),
 ]
