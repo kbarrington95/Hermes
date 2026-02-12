@@ -12,15 +12,12 @@ class SummarySerializer(serializers.ModelSerializer):
         fields = ['id', 'model_used', 'content', 'summary_type', 'created_at']
 
 class TranscriptionSerializer(serializers.ModelSerializer):
-    summaries = SummarySerializer(many=True, read_only=True)
-
     class Meta:
         model = Transcription
-        fields = ['id', 'assembly_id', 'raw_text', 'utterances_json', 'processed_at', 'summaries']
+        fields = ['id', 'assembly_id', 'raw_text', 'utterances_json', 'processed_at']
 
 class RecordingSerializer(serializers.ModelSerializer):
     duration_minutes = serializers.SerializerMethodField(method_name='get_duration_minutes')
-    transcription = TranscriptionSerializer(read_only=True)
 
     class Meta:
         model = Recording
@@ -42,7 +39,7 @@ class CampaignSerializer(serializers.ModelSerializer):
     class Meta:
         model = Campaign
         fields = ['id', 'name', 'description', 'created_at', 'sessions_count', 'vocabulary']
-        
+
     sessions_count = serializers.IntegerField(read_only=True)
     vocabulary = CustomVocabularySerializer(many=True, read_only=True)
 
