@@ -7,9 +7,15 @@ class CustomVocabularySerializer(serializers.ModelSerializer):
         fields = ['id', 'term', 'note']
 
 class SummarySerializer(serializers.ModelSerializer):
+    # Walk up the tree to get parent IDs
+    recording = serializers.IntegerField(source='transcription.recording.id', read_only=True)
+    session = serializers.IntegerField(source='transcription.recording.session.id', read_only=True)
+    campaign = serializers.IntegerField(source='transcription.recording.session.campaign.id', read_only=True)
+
     class Meta:
         model = Summary
-        fields = ['id', 'model_used', 'content', 'summary_type', 'created_at']
+        # Add the new fields to the list
+        fields = ['id', 'model_used', 'content', 'summary_type', 'created_at', 'transcription', 'recording', 'session', 'campaign']
 
 class TranscriptionSerializer(serializers.ModelSerializer):
     class Meta:

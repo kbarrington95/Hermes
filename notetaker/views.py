@@ -49,10 +49,12 @@ class TranscriptionViewSet(ModelViewSet):
         return {'request': self.request}
 
 class SummaryViewSet(ModelViewSet):
-    # Optimize transcription fetch
-    queryset = Summary.objects.select_related('transcription').all()
+    # Fetch transcription, recording, session, and campaign in one single efficient query
+    queryset = Summary.objects.select_related(
+        'transcription__recording__session__campaign'
+    ).all()
     serializer_class = SummarySerializer
-
+    
     def get_serializer_context(self):
         return {'request': self.request}
 
