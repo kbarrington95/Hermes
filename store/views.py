@@ -2,13 +2,13 @@ from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from django.db.models.aggregates import Count
 from rest_framework.filters import SearchFilter, OrderingFilter
-from rest_framework.mixins import CreateModelMixin, RetrieveModelMixin
+from rest_framework.mixins import CreateModelMixin, RetrieveModelMixin, DestroyModelMixin
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.viewsets import ModelViewSet, GenericViewSet
 from .pagination import DefaultPagination
-from .models import Product, Collection, OrderItem, Review, Cart
-from .serializers import ProductSerializers, CollectionSerializer, ReviewSerializer, CartSerializer
+from .models import Product, Collection, OrderItem, Review, Cart, CartItem
+from .serializers import ProductSerializers, CollectionSerializer, ReviewSerializer, CartSerializer, CartItemSerializer
 
 class ProductViewSet(ModelViewSet):
     queryset = Product.objects.all()
@@ -45,6 +45,17 @@ class ReviewViewset(ModelViewSet):
     def get_serializer_context(self):
         return {'product_id': self.kwargs['product_pk']}
     
-class CartViewSet(CreateModelMixin, GenericViewSet, RetrieveModelMixin):
+class CartViewSet(CreateModelMixin, 
+                  GenericViewSet, 
+                  RetrieveModelMixin, 
+                  DestroyModelMixin):
     queryset = Cart.objects.prefetch_related('items__product').all()
     serializer_class = CartSerializer
+
+class CartItemViewSet(ModelViewSet):
+    serializer_class = CartItemSerializer
+
+    def get_queryset(self): # type:ignore 
+        return CartItem.objects \
+             .filter(cart_id=self.kwargs['cart_pk']) \
+             .select_related('product')
