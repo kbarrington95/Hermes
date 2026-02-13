@@ -1,4 +1,7 @@
 from django.db import models
+from django.conf import settings
+from django.utils import timezone
+from decimal import Decimal
 
 class Campaign(models.Model):
     name = models.CharField(max_length=255)
@@ -70,3 +73,88 @@ class CustomVocabulary(models.Model):
 
     class Meta:
         verbose_name_plural = "Custom Vocabularies"
+
+class Subscription(models.Model):
+
+    class Status(models.TextChoices):
+        ACTIVE = 'active', 'Active'
+        PAST_DUE = 'past_due', 'Past Due'
+        CANCELED = 'canceled', 'Canceled'
+        UNPAID = 'unpaid', 'Unpaid'
+        TRIALING = 'trialing', 'Trialing'
+        INACTIVE = 'inactive', 'Inactive' # Default for free/unsubscribed users
+
+    class Tier(models.TextChoices):
+        FREE = 'free', 'Free Tier'
+        BASIC = 'basic', 'Basic Tier'
+        PRO = 'pro', 'Pro Tier'
+
+    # 1. Core Identity & Gateway Links
+    # user = models.OneToOneField(
+    #     settings.AUTH_USER_MODEL, 
+    #     on_delete=models.CASCADE, 
+    #     related_name='subscription'
+    # )
+
+    # for payment processors?
+    # customer_id = models.CharField(max_length=100, blank=True, null=True, unique=True)
+    # subscription_id = models.CharField(max_length=100, blank=True, null=True, unique=True)
+
+    # 2. Subscription Status & Tiers
+    status = models.CharField(max_length=20, choices=Status.choices, default=Status.INACTIVE)
+    plan_tier = models.CharField(max_length=20, choices=Tier.choices, default=Tier.FREE)
+
+    # 3. Usage Quotas
+    monthly_audio_minutes_used = models.DecimalField(
+        max_digits=8, 
+        decimal_places=2, 
+        default=Decimal('0.00'),
+        help_text="Minutes of AssemblyAI transcription used this cycle."
+    )
+    audio_minutes_limit = models.IntegerField(
+        default=60, 
+        help_text="Max audio minutes allowed per billing cycle."
+    )
+    summaries_generated_count = models.IntegerField(
+        default=0, 
+        help_text="Number of summaries generated this cycle."
+    )
+    
+    # 4. Lifecycle Dates
+    billing_cycle_anchor = models.DateTimeField(
+        blank=True, 
+        null=True, 
+        help_text="When the usage quotas should reset to zero."
+    )
+    current_period_start = models.DateTimeField(blank=True, null=True)
+    current_period_end = models.DateTimeField(blank=True, null=True)
+    cancel_at_period_end = models.BooleanField(
+        default=False, 
+        help_text="True if user canceled but retains access until the period ends."
+    )
+
+    # 5. Feature Flags & App Limits
+    # has_custom_vocabulary_access = models.BooleanField(default=False)
+    # max_campaigns_allowed = models.IntegerField(
+    #     default=1, 
+    #     help_text="Limit how many distinct campaigns/parties the user can manage."
+    # )
+
+    # Auditing timestamps
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    # def __str__(self):
+    #     return f"{self.user.username} - {self.get_plan_tier_display()} ({self.get_status_display()})"
+    
+    # @property
+    # def is_active(self):
+    #     """Helper property to quickly check if the user has paid access."""
+    #     return self.status in [self.Status.ACTIVE, self.Status.TRIALING]
+
+    # def reset_usage_quotas(self):
+    #     """Method to call via Celery or Cron when a new billing cycle starts."""
+    #     self.monthly_audio_minutes_used = 0
+    #     self.summaries_generated_count = 0
+    #     self.billing_cycle_anchor = timezone.now()
+    #     self.save(update_fields=['monthly_audio_minutes_used', 'summaries_generated_count', 'billing_cycle_anchor'])
