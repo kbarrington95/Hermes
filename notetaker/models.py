@@ -62,6 +62,9 @@ class Summary(models.Model):
 
     def __str__(self):
         return f"{self.summary_type.capitalize()} Summary for {self.transcription.recording.session.title}"
+    
+    class Meta:
+        verbose_name_plural = "Summaries"
 
 class CustomVocabulary(models.Model):
     campaign = models.ForeignKey(Campaign, on_delete=models.CASCADE, related_name='vocabulary')
@@ -89,12 +92,7 @@ class Subscription(models.Model):
         BASIC = 'basic', 'Basic Tier'
         PRO = 'pro', 'Pro Tier'
 
-    # 1. Core Identity & Gateway Links
-    user = models.OneToOneField(
-        settings.AUTH_USER_MODEL, 
-        on_delete=models.CASCADE, 
-        related_name='subscription'
-    )
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='subscription')
 
     # for payment processors?
     # customer_id = models.CharField(max_length=100, blank=True, null=True, unique=True)
@@ -147,10 +145,10 @@ class Subscription(models.Model):
     def __str__(self):
         return f"{self.user.username} - {self.plan_tier} ({self.status})"
     
-    # @property
-    # def is_active(self):
-    #     """Helper property to quickly check if the user has paid access."""
-    #     return self.status in [self.Status.ACTIVE, self.Status.TRIALING]
+    @property
+    def is_active(self):
+        """Helper property to quickly check if the user has paid access."""
+        return self.status in [self.Status.ACTIVE, self.Status.TRIALING]
 
     # def reset_usage_quotas(self):
     #     """Method to call via Celery or Cron when a new billing cycle starts."""
