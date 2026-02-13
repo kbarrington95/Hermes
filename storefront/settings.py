@@ -158,7 +158,9 @@ SIMPLE_JWT = {
 
 DJOSER = {
     'TOKEN_MODEL': None,
-    # other settings
+    'SERIALIZERS': {
+        'user_create': 'core.serializers.UserCreateSerializer'
+    }
 }
 
 AUTH_USER_MODEL = 'core.User'
