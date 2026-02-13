@@ -50,7 +50,7 @@ class CampaignSerializer(serializers.ModelSerializer):
     vocabulary = CustomVocabularySerializer(many=True, read_only=True)
 
 class SubscriptionSerializer(serializers.ModelSerializer):
-    user_id = serializers.IntegerField()
+    user_id = serializers.IntegerField(read_only=True)
     
     class Meta:
         model = Subscription

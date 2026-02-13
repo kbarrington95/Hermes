@@ -83,10 +83,10 @@ class CustomerViewSet(CreateModelMixin,
     def me(self, request):
         (customer, created) = Customer.objects.get_or_create(user_id=request.user.id)
         if request.method == 'GET':
-            seralizer = CustomerSerializer(customer)
-            return Response (seralizer.data)
+            serializer = CustomerSerializer(customer)
+            return Response (serializer.data)
         elif request.method == 'PUT':
-            seralizer = CustomerSerializer(customer, data=request.data)
-            seralizer.is_valid(raise_exception=True)
-            seralizer.save()
-            return Response(seralizer.data)
+            serializer = CustomerSerializer(customer, data=request.data)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data)
