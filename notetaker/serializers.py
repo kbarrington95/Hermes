@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Campaign, Session, Recording, Transcription, Summary, CustomVocabulary
+from .models import Campaign, Session, Recording, Transcription, Summary, CustomVocabulary, Subscription
 
 class CustomVocabularySerializer(serializers.ModelSerializer):
     class Meta:
@@ -49,4 +49,12 @@ class CampaignSerializer(serializers.ModelSerializer):
     sessions_count = serializers.IntegerField(read_only=True)
     vocabulary = CustomVocabularySerializer(many=True, read_only=True)
 
+class SubscriptionSerializer(serializers.ModelSerializer):
+    user_id = serializers.IntegerField()
     
+    class Meta:
+        model = Subscription
+        fields = ['id', 
+                  'user_id',
+                  'status',
+                  'plan_tier']

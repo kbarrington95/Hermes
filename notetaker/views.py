@@ -2,7 +2,8 @@ from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from django.db.models.aggregates import Count
 from rest_framework.filters import SearchFilter, OrderingFilter
-from rest_framework.viewsets import ModelViewSet
+from rest_framework.viewsets import ModelViewSet, GenericViewSet
+from rest_framework.mixins import CreateModelMixin, RetrieveModelMixin, DestroyModelMixin, UpdateModelMixin
 
 from .models import (
     Campaign, 
@@ -10,7 +11,8 @@ from .models import (
     Recording, 
     Transcription, 
     Summary, 
-    CustomVocabulary
+    CustomVocabulary,
+    Subscription
 )
 from .serializers import (
     CampaignSerializer, 
@@ -18,7 +20,8 @@ from .serializers import (
     RecordingSerializer, 
     TranscriptionSerializer, 
     SummarySerializer, 
-    CustomVocabularySerializer
+    CustomVocabularySerializer,
+    SubscriptionSerializer
 )
 
 class CampaignViewSet(ModelViewSet):
@@ -93,3 +96,11 @@ class CustomVocabularyViewSet(ModelViewSet):
 
     def get_serializer_context(self):
         return {'request': self.request}
+
+class SubscriptionViewSet(CreateModelMixin,
+                      RetrieveModelMixin,
+                      UpdateModelMixin,
+                      GenericViewSet):
+    queryset = Subscription.objects.all()
+    serializer_class = SubscriptionSerializer
+    http_method_names = ['get', 'patch']
