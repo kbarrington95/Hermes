@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Campaign, Session, Recording, Transcription, Summary, CustomVocabulary
+from .models import Campaign, Session, Recording, Transcription, Summary, CustomVocabulary, Subscription
 
 @admin.register(Campaign)
 class CampaignAdmin(admin.ModelAdmin):
@@ -32,3 +32,8 @@ class CustomVocabularyAdmin(admin.ModelAdmin):
     list_display = ('term', 'campaign', 'note')
     list_filter = ('campaign', 'note')
     search_fields = ('term',)
+
+@admin.register(Subscription)
+class SubscriptionAdmin(admin.ModelAdmin):
+    list_display = ('id','user', 'status', 'plan_tier', )
+    list_select_related = ['user']

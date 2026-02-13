@@ -90,11 +90,11 @@ class Subscription(models.Model):
         PRO = 'pro', 'Pro Tier'
 
     # 1. Core Identity & Gateway Links
-    # user = models.OneToOneField(
-    #     settings.AUTH_USER_MODEL, 
-    #     on_delete=models.CASCADE, 
-    #     related_name='subscription'
-    # )
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL, 
+        on_delete=models.CASCADE, 
+        related_name='subscription'
+    )
 
     # for payment processors?
     # customer_id = models.CharField(max_length=100, blank=True, null=True, unique=True)
@@ -109,7 +109,7 @@ class Subscription(models.Model):
         max_digits=8, 
         decimal_places=2, 
         default=Decimal('0.00'),
-        help_text="Minutes of AssemblyAI transcription used this cycle."
+        help_text="Minutes of transcription used this cycle."
     )
     audio_minutes_limit = models.IntegerField(
         default=60, 
@@ -144,8 +144,8 @@ class Subscription(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    # def __str__(self):
-    #     return f"{self.user.username} - {self.get_plan_tier_display()} ({self.get_status_display()})"
+    def __str__(self):
+        return f"{self.user.username} - {self.plan_tier} ({self.status})"
     
     # @property
     # def is_active(self):
@@ -158,3 +158,6 @@ class Subscription(models.Model):
     #     self.summaries_generated_count = 0
     #     self.billing_cycle_anchor = timezone.now()
     #     self.save(update_fields=['monthly_audio_minutes_used', 'summaries_generated_count', 'billing_cycle_anchor'])
+
+    class Meta:
+        ordering = ['user__username']
