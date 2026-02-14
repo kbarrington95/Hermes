@@ -10,8 +10,8 @@ from rest_framework import status
 from rest_framework.viewsets import ModelViewSet, GenericViewSet
 from .permissions import IsAdminOrReadOnly, FullDjangoModelPermissions
 from .pagination import DefaultPagination
-from .models import Product, Collection, OrderItem, Review, Cart, CartItem, Customer
-from .serializers import ProductSerializers, CollectionSerializer, ReviewSerializer, CartSerializer, CartItemSerializer, AddCartItemSerializer, UpdateCartItemSerializer, CustomerSerializer
+from .models import Order, Product, Collection, OrderItem, Review, Cart, CartItem, Customer
+from .serializers import OrderSerializer, ProductSerializers, CollectionSerializer, ReviewSerializer, CartSerializer, CartItemSerializer, AddCartItemSerializer, UpdateCartItemSerializer, CustomerSerializer
 
 class ProductViewSet(ModelViewSet):
     queryset = Product.objects.all()
@@ -93,3 +93,7 @@ class CustomerViewSet(ModelViewSet):
             serializer.is_valid(raise_exception=True)
             serializer.save()
             return Response(serializer.data)
+
+class OrderViewSet(ModelViewSet):
+    queryset = Order.objects.all()
+    serializer_class = OrderSerializer
