@@ -6,7 +6,9 @@ from rest_framework.response import Response
 from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.viewsets import ModelViewSet, GenericViewSet
 from rest_framework.mixins import CreateModelMixin, RetrieveModelMixin, DestroyModelMixin, UpdateModelMixin
+from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
 
+from .permissions import IsAdminOrReadOnly
 from .models import (
     Campaign, 
     Session, 
@@ -29,6 +31,7 @@ from .serializers import (
 class CampaignViewSet(ModelViewSet):
     queryset = Campaign.objects.annotate(sessions_count=Count('sessions')).all()
     serializer_class = CampaignSerializer
+    permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     search_fields = ['name', 'description']
     ordering_fields = ['name', 'created_at', 'sessions_count']
@@ -41,6 +44,7 @@ class SessionViewSet(ModelViewSet):
     queryset = Session.objects.annotate(recordings_count=Count('recordings')) \
                               .select_related('campaign').all()
     serializer_class = SessionSerializer
+    permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filterset_fields = ['campaign_id']
     search_fields = ['title', 'description']
@@ -53,6 +57,7 @@ class SessionViewSet(ModelViewSet):
 class RecordingViewSet(ModelViewSet):
     queryset = Recording.objects.select_related('session').all()
     serializer_class = RecordingSerializer
+    permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filterset_fields = ['session_id']
     search_fields = ['audio_file']
@@ -65,6 +70,7 @@ class RecordingViewSet(ModelViewSet):
 class TranscriptionViewSet(ModelViewSet):
     queryset = Transcription.objects.select_related('recording').all()
     serializer_class = TranscriptionSerializer
+    permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filterset_fields = ['recording_id']
     search_fields = ['raw_text', 'assembly_id']
@@ -79,6 +85,7 @@ class SummaryViewSet(ModelViewSet):
         'transcription__recording__session__campaign'
     ).all()
     serializer_class = SummarySerializer
+    permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filterset_fields = ['transcription_id', 'summary_type', 'model_used']
     search_fields = ['content']
@@ -91,6 +98,7 @@ class SummaryViewSet(ModelViewSet):
 class CustomVocabularyViewSet(ModelViewSet):
     queryset = CustomVocabulary.objects.select_related('campaign').all()
     serializer_class = CustomVocabularySerializer
+    permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filterset_fields = ['campaign_id']
     search_fields = ['term', 'note']
@@ -99,15 +107,12 @@ class CustomVocabularyViewSet(ModelViewSet):
     def get_serializer_context(self):
         return {'request': self.request}
 
-class SubscriptionViewSet(CreateModelMixin,
-                      RetrieveModelMixin,
-                      UpdateModelMixin,
-                      GenericViewSet):
+class SubscriptionViewSet(ModelViewSet):
     queryset = Subscription.objects.all()
     serializer_class = SubscriptionSerializer
-    #http_method_names = ['get', 'patch']
+    permission_classes = [IsAdminUser]
 
-    @action(detail=False, methods=['GET', 'PUT'])
+    @action(detail=False, methods=['GET', 'PUT'], permission_classes=[IsAuthenticated])
     def me(self, request):
         (subscription, created) = Subscription.objects.get_or_create(user_id=request.user.id)
         if request.method == 'GET':
