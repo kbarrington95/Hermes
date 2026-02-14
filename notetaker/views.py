@@ -114,7 +114,7 @@ class SubscriptionViewSet(ModelViewSet):
 
     @action(detail=False, methods=['GET', 'PUT'], permission_classes=[IsAuthenticated])
     def me(self, request):
-        (subscription, created) = Subscription.objects.get_or_create(user_id=request.user.id)
+        subscription= Subscription.objects.get(user_id=request.user.id)
         if request.method == 'GET':
             serializer = SubscriptionSerializer(subscription)
             return Response (serializer.data)
