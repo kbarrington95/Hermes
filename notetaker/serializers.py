@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from django.utils import timezone
 from .models import Campaign, Session, Recording, Transcription, Summary, CustomVocabulary, Subscription
 
 class CustomVocabularySerializer(serializers.ModelSerializer):
@@ -38,6 +39,46 @@ class RecordingSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         session_id = self.context['session_id']
         return Recording.objects.create(session_id=session_id, **validated_data)
+    
+class UploadRecordingSerializer(serializers.ModelSerializer):
+    # Input fields that don't exist directly on the Recording model
+    campaign_id = serializers.PrimaryKeyRelatedField(
+        queryset=Campaign.objects.all(), 
+        source='session.campaign', # purely for documentation/schema generation
+        write_only=True
+    )
+    date = serializers.DateField(required=False, write_only=True)
+    title = serializers.CharField(required=False, write_only=True)
+
+    class Meta:
+        model = Recording
+        fields = ['id', 'audio_file', 'campaign_id', 'date', 'title', 'uploaded_at']
+        read_only_fields = ['id', 'uploaded_at']
+
+    def create(self, validated_data):
+        campaign = validated_data.pop('session')['campaign'] # Extracted from source mapping
+        date_played = validated_data.pop('date', timezone.now().date())
+        
+        # Default title logic: "Session - YYYY-MM-DD"
+        default_title = f"Session - {date_played}"
+        title = validated_data.pop('title', default_title)
+        audio_file = validated_data.pop('audio_file')
+
+        # Create the Session first
+        session = Session.objects.create(
+            campaign=campaign,
+            title=title,
+            date_played=date_played,
+            description="Auto-created via recording upload"
+        )
+        # Create the Recording linked to the new Session
+        recording = Recording.objects.create(
+            session=session,
+            audio_file=audio_file,
+            **validated_data # Catch any other fields like duration if passed
+        )
+        
+        return recording
 
 class SessionSerializer(serializers.ModelSerializer):
     recording = RecordingSerializer()

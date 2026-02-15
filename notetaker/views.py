@@ -25,7 +25,8 @@ from .serializers import (
     TranscriptionSerializer, 
     SummarySerializer, 
     CustomVocabularySerializer,
-    SubscriptionSerializer
+    SubscriptionSerializer,
+    UploadRecordingSerializer
 )
 
 class CampaignViewSet(ModelViewSet):
@@ -54,17 +55,18 @@ class SessionViewSet(ModelViewSet):
 
 
 class RecordingViewSet(ModelViewSet):
-    #queryset = Recording.objects.select_related('session').all()
-    serializer_class = RecordingSerializer
+    queryset = Recording.objects.select_related('session').all()
     permission_classes = [IsAuthenticated]
     filter_backends = [OrderingFilter]
     ordering_fields = ['uploaded_at', 'duration_seconds']
 
-    def get_queryset(self): #type:ignore
-        return Recording.objects.filter(session_id=self.kwargs['session_pk'])
+    def get_serializer_class(self): #type:ignore
+        if self.request.method == 'POST':
+            return UploadRecordingSerializer
+        return RecordingSerializer
 
     def get_serializer_context(self):
-        return {'session_id':self.kwargs['session_pk']}
+        return {'request': self.request}
 
 
 class TranscriptionViewSet(ModelViewSet):

@@ -14,9 +14,8 @@ router.register('transcriptions', views.TranscriptionViewSet)
 router.register('summaries', views.SummaryViewSet)
 router.register('vocabulary', views.CustomVocabularyViewSet)
 router.register('subscription', views.SubscriptionViewSet)
+router.register('recordings', views.RecordingViewSet)
 
-sessions_router = routers.NestedDefaultRouter(router, 'sessions', lookup='session')
-sessions_router.register('recording', views.RecordingViewSet, basename='session-recording')
 
 # Define the URL patterns
-urlpatterns = router.urls + sessions_router.urls
+urlpatterns = router.urls
