@@ -29,7 +29,7 @@ class Recording(models.Model):
     """
     A session could have multiple audio files (e.g., pre-break and post-break).
     """
-    session = models.ForeignKey(Session, on_delete=models.CASCADE, related_name='recordings')
+    session = models.OneToOneField(Session, on_delete=models.CASCADE, related_name='recording')
     audio_file = models.FileField(upload_to='notetaker/recordings')
     duration_seconds = models.IntegerField(null=True, blank=True)
     uploaded_at = models.DateTimeField(auto_now_add=True)

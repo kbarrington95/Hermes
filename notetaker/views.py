@@ -41,14 +41,13 @@ class CampaignViewSet(ModelViewSet):
 
 
 class SessionViewSet(ModelViewSet):
-    queryset = Session.objects.annotate(recordings_count=Count('recordings')) \
-                              .select_related('campaign').all()
+    queryset = Session.objects.select_related('campaign', 'recording').all()
     serializer_class = SessionSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filterset_fields = ['campaign_id']
     search_fields = ['title', 'description']
-    ordering_fields = ['date_played', 'created_at', 'recordings_count']
+    ordering_fields = ['date_played', 'created_at']
 
     def get_serializer_context(self):
         return {'request': self.request}

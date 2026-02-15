@@ -40,11 +40,11 @@ class RecordingSerializer(serializers.ModelSerializer):
         return Recording.objects.create(session_id=session_id, **validated_data)
 
 class SessionSerializer(serializers.ModelSerializer):
-    recordings_count = serializers.IntegerField(read_only=True)
-    
+    recording = RecordingSerializer()
+
     class Meta:
         model = Session
-        fields = ['id', 'title', 'date_played', 'description', 'created_at', 'recordings_count']
+        fields = ['id', 'title', 'date_played', 'description', 'created_at', 'recording']
 
 class CampaignSerializer(serializers.ModelSerializer):
     class Meta:
