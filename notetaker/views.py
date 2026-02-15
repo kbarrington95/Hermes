@@ -55,16 +55,17 @@ class SessionViewSet(ModelViewSet):
 
 
 class RecordingViewSet(ModelViewSet):
-    queryset = Recording.objects.select_related('session').all()
+    #queryset = Recording.objects.select_related('session').all()
     serializer_class = RecordingSerializer
     permission_classes = [IsAuthenticated]
-    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
-    filterset_fields = ['session_id']
-    search_fields = ['audio_file']
+    filter_backends = [OrderingFilter]
     ordering_fields = ['uploaded_at', 'duration_seconds']
 
+    def get_queryset(self): #type:ignore
+        return Recording.objects.filter(session_id=self.kwargs['session_pk'])
+
     def get_serializer_context(self):
-        return {'request': self.request}
+        return {'session_id':self.kwargs['session_pk']}
 
 
 class TranscriptionViewSet(ModelViewSet):

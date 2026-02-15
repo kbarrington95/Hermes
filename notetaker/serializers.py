@@ -24,15 +24,20 @@ class TranscriptionSerializer(serializers.ModelSerializer):
 
 class RecordingSerializer(serializers.ModelSerializer):
     duration_minutes = serializers.SerializerMethodField(method_name='get_duration_minutes')
+    uploaded_at = serializers.DateTimeField(read_only=True)
 
     class Meta:
         model = Recording
-        fields = ['id', 'audio_file', 'duration_seconds', 'duration_minutes', 'uploaded_at', 'transcription']
+        fields = ['id', 'audio_file', 'duration_minutes', 'uploaded_at']
 
     def get_duration_minutes(self, recording: Recording):
         if recording.duration_seconds:
             return round(recording.duration_seconds / 60, 2)
         return 0
+    
+    def create(self, validated_data):
+        session_id = self.context['session_id']
+        return Recording.objects.create(session_id=session_id, **validated_data)
 
 class SessionSerializer(serializers.ModelSerializer):
     recordings_count = serializers.IntegerField(read_only=True)
