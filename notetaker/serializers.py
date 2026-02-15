@@ -23,13 +23,14 @@ class TranscriptionSerializer(serializers.ModelSerializer):
         model = Transcription
         fields = ['id', 'assembly_id', 'raw_text', 'utterances_json', 'processed_at']
 
+
 class RecordingSerializer(serializers.ModelSerializer):
     duration_minutes = serializers.SerializerMethodField(method_name='get_duration_minutes')
     uploaded_at = serializers.DateTimeField(read_only=True)
 
     class Meta:
         model = Recording
-        fields = ['id', 'audio_file', 'duration_minutes', 'uploaded_at']
+        fields = ['id', 'session', 'audio_file', 'duration_minutes', 'uploaded_at', 'transcription']
 
     def get_duration_minutes(self, recording: Recording):
         if recording.duration_seconds:

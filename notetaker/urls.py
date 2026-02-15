@@ -14,7 +14,7 @@ router.register('transcriptions', views.TranscriptionViewSet)
 router.register('summaries', views.SummaryViewSet)
 router.register('vocabulary', views.CustomVocabularyViewSet)
 router.register('subscription', views.SubscriptionViewSet)
-router.register('recordings', views.RecordingViewSet)
+router.register('recordings', views.RecordingViewSet, basename='recordings')
 
 
 # Define the URL patterns

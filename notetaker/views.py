@@ -55,10 +55,19 @@ class SessionViewSet(ModelViewSet):
 
 
 class RecordingViewSet(ModelViewSet):
-    queryset = Recording.objects.select_related('session').all()
+    #queryset = Recording.objects.select_related('session').all()
     permission_classes = [IsAuthenticated]
     filter_backends = [OrderingFilter]
     ordering_fields = ['uploaded_at', 'duration_seconds']
+
+    def get_queryset(self): #type:ignore
+        user = self.request.user
+
+        if user.is_staff:
+            return Recording.objects.select_related('session').all()
+        
+        subscription_id = Subscription.objects.only('id').get(user_id=user.id)
+        return Recording.objects.filter(session__campaign__subscription=subscription_id)
 
     def get_serializer_class(self): #type:ignore
         if self.request.method == 'POST':
