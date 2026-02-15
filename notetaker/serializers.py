@@ -90,7 +90,7 @@ class SessionSerializer(serializers.ModelSerializer):
 class CampaignSerializer(serializers.ModelSerializer):
     class Meta:
         model = Campaign
-        fields = ['id', 'name', 'description', 'created_at', 'sessions_count', 'vocabulary']
+        fields = ['id', 'subscription', 'name', 'description', 'created_at', 'sessions_count', 'vocabulary']
 
     sessions_count = serializers.IntegerField(read_only=True)
     vocabulary = CustomVocabularySerializer(many=True, read_only=True)
