@@ -1,7 +1,9 @@
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from django.db.models.aggregates import Count
+from django.utils import timezone
 from rest_framework.decorators import action
+from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.viewsets import ModelViewSet, GenericViewSet
@@ -9,6 +11,7 @@ from rest_framework.mixins import CreateModelMixin, RetrieveModelMixin, DestroyM
 from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
 
 from .permissions import IsAdminOrReadOnly
+from .services import AssemblyAIService
 from .models import (
     Campaign, 
     Session, 
@@ -76,6 +79,45 @@ class RecordingViewSet(ModelViewSet):
 
     def get_serializer_context(self):
         return {'request': self.request}
+    
+    @action(detail=True, methods=['POST','GET'])
+    def transcribe(self, request, pk=None):
+        # 1. Get the object using the viewset's built-in security (get_queryset)
+        recording = self.get_object() 
+
+        # 2. Check if already transcribed to save credits
+        if hasattr(recording, 'transcription'):
+             serializer = TranscriptionSerializer(recording.transcription)
+             return Response(
+                 {"message": "Already transcribed", "data": serializer.data},
+                 status=status.HTTP_200_OK
+             )
+
+        try:
+            # 3. Call the Service (Blocking call)
+            # Use .path to get the absolute filesystem path
+            transcript_obj = AssemblyAIService.transcribe(recording.audio_file.path)
+            
+            # 4. Save to Database
+            transcription = Transcription.objects.create(
+                recording=recording,
+                assembly_id=transcript_obj.id,
+                raw_text=transcript_obj.text,
+                utterances_json=transcript_obj.json_response.get('utterances', []),
+                processed_at=timezone.now()
+            )
+
+            # 5. Return the result
+            return Response(
+                TranscriptionSerializer(transcription).data, 
+                status=status.HTTP_201_CREATED
+            )
+
+        except Exception as e:
+            return Response(
+                {"error": str(e)}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 
 class TranscriptionViewSet(ModelViewSet):
@@ -89,7 +131,6 @@ class TranscriptionViewSet(ModelViewSet):
 
     def get_serializer_context(self):
         return {'request': self.request}
-
 
 class SummaryViewSet(ModelViewSet):
     queryset = Summary.objects.select_related(
@@ -134,3 +175,4 @@ class SubscriptionViewSet(ModelViewSet):
             serializer.is_valid(raise_exception=True)
             serializer.save()
             return Response(serializer.data)
+        
