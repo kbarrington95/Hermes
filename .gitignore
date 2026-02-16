@@ -12,3 +12,5 @@ media/
 # IDE
 *.code-workspace
 .DS_Store
+
+test.txt
