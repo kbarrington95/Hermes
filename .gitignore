@@ -12,3 +12,6 @@ media/
 # IDE
 *.code-workspace
 .DS_Store
+
+#Other
+SQL SeedFiles/
