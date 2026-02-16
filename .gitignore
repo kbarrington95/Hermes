@@ -1,0 +1,14 @@
+# Security
+.env
+db.sqlite3
+
+# Python Bytecode
+__pycache__/
+*.pyc
+
+# Media (Keep the folder, ignore the content)
+media/
+
+# IDE
+*.code-workspace
+.DS_Store
