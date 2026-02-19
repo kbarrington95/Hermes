@@ -1,6 +1,7 @@
 from django.db import models
 from django.conf import settings
 from django.utils import timezone
+from django.core.validators import MinValueValidator, FileExtensionValidator
 from decimal import Decimal
 
 class Subscription(models.Model):
@@ -114,7 +115,7 @@ class Recording(models.Model):
     A session could have multiple audio files (e.g., pre-break and post-break).
     """
     session = models.OneToOneField(Session, on_delete=models.CASCADE, related_name='recording')
-    audio_file = models.FileField(upload_to='notetaker/recordings')
+    audio_file = models.FileField(upload_to='notetaker/recordings', validators=[FileExtensionValidator(allowed_extensions=['mp3'])])
     duration_seconds = models.IntegerField(null=True, blank=True)
     uploaded_at = models.DateTimeField(auto_now_add=True)
 

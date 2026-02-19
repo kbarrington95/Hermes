@@ -14,14 +14,14 @@ from .models import Order, Product, Collection, OrderItem, ProductImage, Review,
 from .serializers import CreateOrderSerializer, OrderSerializer, ProductImageSerializer, ProductSerializers, CollectionSerializer, ReviewSerializer, CartSerializer, CartItemSerializer, AddCartItemSerializer, UpdateCartItemSerializer, CustomerSerializer, UpdateOrderSerializer
 
 class ProductViewSet(ModelViewSet):
-    queryset = Product.objects.all()
+    queryset = Product.objects.prefetch_related('images').all()
     serializer_class = ProductSerializers
     permission_classes = [IsAdminOrReadOnly]
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     pagination_class = DefaultPagination
     filterset_fields = ['collection_id']
     search_fields = ['title', 'description']
-    ordering_fields = ['unit_price', 'last_update']
+    ordering_fields = ['id', 'unit_price', 'last_update']
     
 
     def get_serializer_context(self):
