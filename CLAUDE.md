@@ -67,3 +67,53 @@ The `notetaker/` app has a service layer (`services.py`) that wraps AssemblyAI S
 /playground/     — Demo views
 /__debug__/      — Django debug toolbar
 ```
+
+## Full Pip list (last time I ran)
+Package                       Version
+----------------------------- --------
+annotated-types               0.7.0
+anyio                         4.12.1
+asgiref                       3.11.1
+assemblyai                    0.52.0
+certifi                       2026.1.4
+cffi                          2.0.0
+charset-normalizer            3.4.4
+cryptography                  46.0.5
+defusedxml                    0.7.1
+Django                        4.2.28
+django-debug-toolbar          3.2.1
+django-extensions             4.1
+django-filter                 25.1
+djangorestframework           3.16.1
+djangorestframework_simplejwt 5.5.1
+djoser                        2.3.3
+drf-nested-routers            0.95.0
+exceptiongroup                1.3.1
+h11                           0.16.0
+httpcore                      1.0.9
+httpx                         0.28.1
+idna                          3.11
+mysqlclient                   2.0.3
+oauthlib                      3.3.1
+pillow                        11.3.0
+pip                           25.3
+pycparser                     2.23
+pydantic                      2.12.5
+pydantic_core                 2.41.5
+pydot                         4.0.1
+PyJWT                         2.11.0
+pyparsing                     3.3.2
+python-dotenv                 1.2.1
+python3-openid                3.2.0
+pytz                          2021.1
+requests                      2.32.5
+requests-oauthlib             2.0.0
+setuptools                    80.9.0
+social-auth-app-django        5.4.3
+social-auth-core              4.7.0
+sqlparse                      0.5.5
+typing_extensions             4.15.0
+typing-inspection             0.4.2
+tzdata                        2025.3
+urllib3                       2.6.3
+websockets                    15.0.1
