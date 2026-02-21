@@ -11,7 +11,7 @@ from rest_framework.mixins import CreateModelMixin, RetrieveModelMixin, DestroyM
 from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
 
 from .permissions import IsAdminOrReadOnly
-from .services import AssemblyAIService
+from .services import AssemblyAIService, GeminiService
 from .models import (
     Campaign, 
     Session, 
@@ -131,6 +131,48 @@ class TranscriptionViewSet(ModelViewSet):
 
     def get_serializer_context(self):
         return {'request': self.request}
+    
+    @action(detail=True, methods=['POST','GET'])
+    def summarize(self, request, pk=None):
+        """
+        Manual trigger to generate a D&D session summary using Gemini.
+        URL: POST /api/transcriptions/<id>/summarize/
+        """
+        # 1. Get the transcription object
+        transcription = self.get_object() 
+
+        # 2. Check if a summary already exists to save API credits
+        existing_summary = Summary.objects.filter(transcription=transcription).first()
+        if existing_summary:
+             serializer = SummarySerializer(existing_summary)
+             return Response(
+                 {"message": "Already summarized", "data": serializer.data},
+                 status=status.HTTP_200_OK
+             )
+
+        try:
+            # 3. Call the Gemini Service using the raw text from the DB
+            summary_text = GeminiService.generate_dnd_summary(transcription.raw_text)
+            
+            # 4. Save the generated summary to the Database
+            summary = Summary.objects.create(
+                transcription=transcription,
+                model_used='gemini-2.5-flash',
+                summary_type='dnd_session',  # Update this if your model expects a different default
+                content=summary_text
+            )
+
+            # 5. Return the serialized result
+            return Response(
+                SummarySerializer(summary).data, 
+                status=status.HTTP_201_CREATED
+            )
+
+        except Exception as e:
+            return Response(
+                {"error": str(e)}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 class SummaryViewSet(ModelViewSet):
     queryset = Summary.objects.select_related(

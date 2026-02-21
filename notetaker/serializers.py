@@ -21,7 +21,7 @@ class SummarySerializer(serializers.ModelSerializer):
 class TranscriptionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Transcription
-        fields = ['id', 'assembly_id', 'raw_text', 'utterances_json', 'processed_at']
+        fields = ['id', 'assembly_id', 'raw_text', 'processed_at']
 
 
 class RecordingSerializer(serializers.ModelSerializer):
