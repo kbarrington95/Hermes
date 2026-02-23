@@ -12,7 +12,7 @@ from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
 
 from .permissions import IsAdminOrReadOnly
 from .services import AssemblyAIService, GeminiService
-from .tasks import process_transcription
+from .tasks import process_transcription, process_summary
 from .models import (
     Campaign, 
     Session, 
@@ -125,40 +125,25 @@ class TranscriptionViewSet(ModelViewSet):
         URL: POST /api/transcriptions/<id>/summarize/
         """
         # 1. Get the transcription object
-        transcription = self.get_object() 
+        transcription = self.get_object()
 
         # 2. Check if a summary already exists to save API credits
+        # (Assuming you have a related_name='summary' or similar on your model)
         existing_summary = Summary.objects.filter(transcription=transcription).first()
         if existing_summary:
-             serializer = SummarySerializer(existing_summary)
-             return Response(
-                 {"message": "Already summarized", "data": serializer.data},
-                 status=status.HTTP_200_OK
-             )
-
-        try:
-            # 3. Call the Gemini Service using the raw text from the DB
-            summary_text = GeminiService.generate_dnd_summary(transcription.raw_text)
-            
-            # 4. Save the generated summary to the Database
-            summary = Summary.objects.create(
-                transcription=transcription,
-                model_used='gemini-2.5-flash',
-                summary_type='dnd_session',  # Update this if your model expects a different default
-                content=summary_text
-            )
-
-            # 5. Return the serialized result
             return Response(
-                SummarySerializer(summary).data, 
-                status=status.HTTP_201_CREATED
+                {"message": "This transcription has already been summarized."}, 
+                status=status.HTTP_400_BAD_REQUEST
             )
 
-        except Exception as e:
-            return Response(
-                {"error": str(e)}, 
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
+        # 3. Trigger the background task, passing ONLY the ID
+        process_summary.delay(transcription.id)  # type: ignore
+
+        # 4. Immediately respond
+        return Response(
+            {"message": "Summarization sent to background worker. Check back soon!"},
+            status=status.HTTP_202_ACCEPTED
+        )
 
 class SummaryViewSet(ModelViewSet):
     queryset = Summary.objects.select_related(
