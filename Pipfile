@@ -17,6 +17,7 @@ django-templated-mail = "*"
 redis = "*"
 python-dotenv = "*"
 celery = "*"
+markdown = "*"
 
 [dev-packages]
 

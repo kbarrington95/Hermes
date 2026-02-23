@@ -1,4 +1,6 @@
 from django.contrib import admin
+from django.utils.safestring import mark_safe
+import markdown
 from .models import Campaign, Session, Recording, Transcription, Summary, CustomVocabulary, Subscription
 
 @admin.register(Campaign)
@@ -21,11 +23,28 @@ class RecordingAdmin(admin.ModelAdmin):
 class TranscriptionAdmin(admin.ModelAdmin):
     list_display = ('id', 'recording', 'assembly_id', 'processed_at')
     search_fields = ('assembly_id', 'raw_text')
+    
 
 @admin.register(Summary)
 class SummaryAdmin(admin.ModelAdmin):
     list_display = ('id', 'transcription', 'summary_type', 'model_used', 'created_at')
     list_filter = ('summary_type', 'model_used')
+    readonly_fields = ('formatted_content',)
+
+
+    def formatted_content(self, obj):
+        """
+        Converts the raw markdown text into HTML and tells Django it is safe to render.
+        """
+        if obj.content:
+            # 1. Convert Markdown to HTML
+            html_content = markdown.markdown(obj.content)
+            # 2. Tell Django this HTML is safe to display
+            return mark_safe(html_content)
+        return "No summary generated yet."
+    
+    # This sets the label for the field in the admin interface
+    formatted_content.short_description = 'Rendered D&D Notes' #type:ignore
 
 @admin.register(CustomVocabulary)
 class CustomVocabularyAdmin(admin.ModelAdmin):
