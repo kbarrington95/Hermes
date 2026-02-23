@@ -16,6 +16,7 @@ pillow = "*"
 django-templated-mail = "*"
 redis = "*"
 python-dotenv = "*"
+celery = "*"
 
 [dev-packages]
 

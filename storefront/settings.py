@@ -196,3 +196,5 @@ DEFAULT_FROM_EMAIL = 'from@moshbuy.com'
 ADMINS = [
     ('Keith', 'admin@keith.com')
 ]
+
+CELERY_BROKER_URL = 'redis://localhost:6379/1'

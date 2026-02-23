@@ -12,6 +12,7 @@ from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
 
 from .permissions import IsAdminOrReadOnly
 from .services import AssemblyAIService, GeminiService
+from .tasks import process_transcription
 from .models import (
     Campaign, 
     Session, 
@@ -82,42 +83,27 @@ class RecordingViewSet(ModelViewSet):
     
     @action(detail=True, methods=['POST','GET'])
     def transcribe(self, request, pk=None):
-        # 1. Get the object using the viewset's built-in security (get_queryset)
-        recording = self.get_object() 
+        """
+        Triggers a background Celery task to transcribe a specific recording.
+        URL: POST /api/recordings/<id>/transcribe/
+        """
+        recording = self.get_object()
 
-        # 2. Check if already transcribed to save credits
+        # 1. Protect your API credits using your OneToOne related_name
         if hasattr(recording, 'transcription'):
-             serializer = TranscriptionSerializer(recording.transcription)
-             return Response(
-                 {"message": "Already transcribed", "data": serializer.data},
-                 status=status.HTTP_200_OK
-             )
-
-        try:
-            # 3. Call the Service (Blocking call)
-            # Use .path to get the absolute filesystem path
-            transcript_obj = AssemblyAIService.transcribe(recording.audio_file.path)
-            
-            # 4. Save to Database
-            transcription = Transcription.objects.create(
-                recording=recording,
-                assembly_id=transcript_obj.id,
-                raw_text=transcript_obj.text,
-                utterances_json=transcript_obj.json_response.get('utterances', []),
-                processed_at=timezone.now()
-            )
-
-            # 5. Return the result
             return Response(
-                TranscriptionSerializer(transcription).data, 
-                status=status.HTTP_201_CREATED
+                {"message": "This recording has already been transcribed."}, 
+                status=status.HTTP_400_BAD_REQUEST
             )
 
-        except Exception as e:
-            return Response(
-                {"error": str(e)}, 
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
+        # 2. Trigger the background task, passing ONLY the ID
+        process_transcription.delay(recording.id)  # type: ignore
+
+        # 3. Immediately respond so the user isn't kept waiting
+        return Response(
+            {"message": "Transcription sent to background worker. Check back soon!"},
+            status=status.HTTP_202_ACCEPTED
+        )
 
 
 class TranscriptionViewSet(ModelViewSet):
