@@ -15,3 +15,7 @@ media/
 
 #Other
 SQL SeedFiles/
+
+#Testing
+pytest.ini
+store/tests/
