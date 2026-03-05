@@ -8,6 +8,7 @@ __pycache__/
 
 # Media (Keep the folder, ignore the content)
 media/
+/static/
 
 # IDE
 *.code-workspace
