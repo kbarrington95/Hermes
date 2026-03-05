@@ -23,6 +23,11 @@ django-redis = "*"
 whitenoise = "*"
 gunicorn = "*"
 dj-database-url = "*"
+django-extensions = "*"
+django-cors-headers = "*"
+django-silk = "*"
+assemblyai = "*"
+google-genai = "*"
 
 [dev-packages]
 pytest = "*"
@@ -31,4 +36,4 @@ model-bakery = "*"
 locust = "*"
 
 [requires]
-python_version = "3.9"
+python_version = "3.12"
