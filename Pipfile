@@ -19,6 +19,7 @@ python-dotenv = "*"
 celery = "*"
 markdown = "*"
 flower = "*"
+django-redis = "*"
 
 [dev-packages]
 pytest = "*"
