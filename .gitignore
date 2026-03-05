@@ -20,3 +20,4 @@ SQL SeedFiles/
 #Testing
 pytest.ini
 store/tests/
+general.log
