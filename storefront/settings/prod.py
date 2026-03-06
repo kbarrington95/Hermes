@@ -37,14 +37,29 @@ EMAIL_HOST_USER = os.environ['MAILGUN_SMTP_LOGIN']
 EMAIL_HOST_PASSWORD = os.environ['MAILGUN_SMTP_PASSWORD']
 EMAIL_PORT = os.environ['MAILGUN_SMTP_PORT']
 
-# 1. Add 'storages' to your apps
-INSTALLED_APPS += ['storages']
+USE_S3 = os.environ['USE_S3']
+
+if USE_S3:
+    INSTALLED_APPS += ['storages']
+    
+    # NEW FORMAT for Django 4.2+
+    STORAGES = {
+        "default": {
+            "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
+            "OPTIONS": {
+                "access_key": os.environ.get('AWS_ACCESS_KEY_ID'),
+                "secret_key": os.environ.get('AWS_SECRET_ACCESS_KEY'),
+                "bucket_name": os.environ.get('AWS_STORAGE_BUCKET_NAME'),
+                "region_name": "us-east-2", # Match your Ohio bucket
+            },
+        }
+    }
 
 # 2. AWS Credentials
-AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID')
-AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY')
-AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME')
-AWS_S3_REGION_NAME = 'us-east-2'
+# AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID')
+# AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY')
+# AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME')
+# AWS_S3_REGION_NAME = 'us-east-2'
 
 # 3. Security & URL Settings
 AWS_S3_SIGNATURE_VERSION = 's3v4'

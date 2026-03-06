@@ -9,21 +9,22 @@ def process_transcription(recording_id):
     Background task to process a recording through AssemblyAI and save it to the DB.
     """
     try:
-        # 1. Fetch the exact recording
         recording = Recording.objects.get(id=recording_id)
 
-        # 2. Determine the audio source based on the storage backend
-        # Checks if we are using S3 (Production) or FileSystem (Dev)
-        if 's3boto3' in settings.DEFAULT_FILE_STORAGE.lower():
-            # Production: Stream via S3 URL to stay under 512MB RAM limit
+        # 1. Try to get a URL (Works for S3/Cloud)
+        # 2. Fall back to .path (Works for Local/Austin dev)
+        try:
             audio_source = recording.audio_file.url
-        else:
-            # Local Dev: Use the direct file path on your machine
+            # Check if it's a relative local URL (e.g., /media/...) 
+            # AssemblyAI needs a full path or a full remote URL
+            if audio_source.startswith('/'):
+                audio_source = recording.audio_file.path
+        except (NotImplementedError, AttributeError):
             audio_source = recording.audio_file.path
 
-        # 3. Call the service and get the transcript object back
-        # AssemblyAI SDK handles both URLs and local paths automatically
-        transcript = AssemblyAIService.transcribe(audio_source) 
+        # Now the task doesn't care IF it's S3 or local, 
+        # it just cares about getting a valid string for the service.
+        transcript = AssemblyAIService.transcribe(audio_source)
         
         # 3. If you want to save the JSON utterances, extract them into a list of dicts
         utterances_data = None
