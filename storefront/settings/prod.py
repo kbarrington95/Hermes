@@ -16,14 +16,14 @@ DATABASES = {
     'default': dj_database_url.config()
 }
 
-REDIS_URL = os.environ['REDIS_URL']
+REDISCLOUD_URL = os.environ['REDISCLOUD_URL']
 
-CELERY_BROKER_URL = REDIS_URL
+CELERY_BROKER_URL = REDISCLOUD_URL
 
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": REDIS_URL,
+        "LOCATION": REDISCLOUD_URL,
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         }
