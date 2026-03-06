@@ -36,3 +36,24 @@ EMAIL_HOST = os.environ['MAILGUN_SMTP_SERVER']
 EMAIL_HOST_USER = os.environ['MAILGUN_SMTP_LOGIN']
 EMAIL_HOST_PASSWORD = os.environ['MAILGUN_SMTP_PASSWORD']
 EMAIL_PORT = os.environ['MAILGUN_SMTP_PORT']
+
+# 1. Add 'storages' to your apps
+INSTALLED_APPS += ['storages']
+
+# 2. AWS Credentials
+AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID')
+AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY')
+AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME')
+AWS_S3_REGION_NAME = 'us-east-2'
+
+# 3. Security & URL Settings
+AWS_S3_SIGNATURE_VERSION = 's3v4'
+AWS_S3_FILE_OVERWRITE = False
+AWS_DEFAULT_ACL = None
+AWS_S3_VERIFY = True
+
+# 4. Tell Django to use S3 for Media Files
+DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+
+# 5. Optional: Use S3 for Static Files too (CSS/JS)
+# STATICFILES_STORAGE = 'storages.backends.s3boto3.S3StaticStorage'

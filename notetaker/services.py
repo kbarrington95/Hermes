@@ -3,22 +3,24 @@ from google import genai
 from django.conf import settings
 
 
-# Initialize once with your API key from settings
-aai.settings.api_key = settings.ASSEMBLY_AI_API_KEY
-
 class AssemblyAIService:
     
     @staticmethod
-    def transcribe(file_path):
+    def transcribe(audio_source): # Renamed from file_path to reflect URL/Path flexibility
         """
-        Uses the SDK to transcribe the file.
+        Uses the SDK to transcribe the file or URL.
         Blocking call - will wait for completion.
         """
+        # --- NEW CODE ADDED ---
+        # Explicitly set the API key from your environment-aware settings
+        aai.settings.api_key = settings.ASSEMBLY_AI_API_KEY
+        # ----------------------
         
-        # 1. Configuration (Move your D&D list here or pass it in)
+        # 1. Configuration
         config = aai.TranscriptionConfig(
-            speech_model=aai.SpeechModel.best, # or "universal"
+            speech_model=aai.SpeechModel.best,
             speaker_labels=True,
+            # Boosted terms for your specific campaign
             word_boost=["Zaki", "Ool", "Alis", "Sama", "Grunk", "Illithinoch"]
         )
 
@@ -26,13 +28,14 @@ class AssemblyAIService:
         transcriber = aai.Transcriber()
         
         try:
-            # The SDK handles upload + polling automatically
-            transcript = transcriber.transcribe(file_path, config=config)
+            # The SDK detects if audio_source is a local path or an S3 URL
+            # It handles upload + polling automatically
+            transcript = transcriber.transcribe(audio_source, config=config)
             
             if transcript.status == aai.TranscriptStatus.error:
                  raise Exception(f"AssemblyAI Error: {transcript.error}")
                  
-            return transcript # Returns the Object, not a dict
+            return transcript 
 
         except Exception as e:
             raise Exception(f"Transcription failed: {str(e)}")

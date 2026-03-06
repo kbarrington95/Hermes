@@ -1,4 +1,5 @@
 from celery import shared_task
+from django.conf import settings
 from .models import Recording, Transcription, Summary
 from .services import AssemblyAIService, GeminiService
 
@@ -11,9 +12,18 @@ def process_transcription(recording_id):
         # 1. Fetch the exact recording
         recording = Recording.objects.get(id=recording_id)
 
-        # 2. Call the service and get the transcript object back
-        # (This uses the exact file path from your FileField)
-        transcript = AssemblyAIService.transcribe(recording.audio_file.path) 
+        # 2. Determine the audio source based on the storage backend
+        # Checks if we are using S3 (Production) or FileSystem (Dev)
+        if 's3boto3' in settings.DEFAULT_FILE_STORAGE.lower():
+            # Production: Stream via S3 URL to stay under 512MB RAM limit
+            audio_source = recording.audio_file.url
+        else:
+            # Local Dev: Use the direct file path on your machine
+            audio_source = recording.audio_file.path
+
+        # 3. Call the service and get the transcript object back
+        # AssemblyAI SDK handles both URLs and local paths automatically
+        transcript = AssemblyAIService.transcribe(audio_source) 
         
         # 3. If you want to save the JSON utterances, extract them into a list of dicts
         utterances_data = None
