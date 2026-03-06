@@ -28,6 +28,8 @@ django-cors-headers = "*"
 django-silk = "*"
 assemblyai = "*"
 google-genai = "*"
+django-storages = "*"
+boto3 = "*"
 
 [dev-packages]
 pytest = "*"
