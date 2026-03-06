@@ -29,7 +29,7 @@ def process_transcription(recording_id):
             recording=recording,
             assembly_id=transcript.id,  # Capturing the required ID
             raw_text=transcript.text,
-            utterances_json=utterances_data
+            #utterances_json=utterances_data
         )
         
         return f"Successfully transcribed recording {recording_id}"

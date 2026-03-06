@@ -3,6 +3,8 @@ import os
 import dj_database_url
 
 DEBUG = False
+SILKY_MAX_RECORDED_REQUESTS = 10**3  # Limit to 1,000 requests
+SILKY_MAX_RECORDED_REQUESTS_CHECK_PERCENT = 10
 
 SECRET_KEY = os.environ['SECRET_KEY']
 

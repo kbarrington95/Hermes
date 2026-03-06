@@ -128,7 +128,7 @@ class Transcription(models.Model):
     raw_text = models.TextField()
     
     # Store JSON data if you want to keep word-level timestamps or speaker data separately
-    utterances_json = models.JSONField(null=True, blank=True) 
+    #utterances_json = models.JSONField(null=True, blank=True) 
     
     processed_at = models.DateTimeField(auto_now_add=True)
 
