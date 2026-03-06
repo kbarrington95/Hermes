@@ -42,27 +42,28 @@ USE_S3 = os.environ['USE_S3']
 AWS_S3_FILE_OVERWRITE = False
 AWS_DEFAULT_ACL = None
 AWS_S3_VERIFY = True
+AWS_S3_ADDRESSING_STYLE = "virtual"
 AWS_QUERYSTRING_AUTH = True  # Required for the signed URLs AssemblyAI uses
 
-if USE_S3:
-    INSTALLED_APPS += ['storages']
+
+INSTALLED_APPS += ['storages']
     
-    # NEW FORMAT for Django 4.2+
-    STORAGES = {
-        "default": {
-            "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
-            "OPTIONS": {
-                "access_key": os.environ.get('AWS_ACCESS_KEY_ID'),
-                "secret_key": os.environ.get('AWS_SECRET_ACCESS_KEY'),
-                "bucket_name": os.environ.get('AWS_STORAGE_BUCKET_NAME'),
-                "region_name": "us-east-2",
-                "signature_version": "s3v4",
-            },
+# NEW FORMAT for Django 4.2+
+STORAGES = {
+    "default": {
+         "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
+         "OPTIONS": {
+              "access_key": os.environ.get('AWS_ACCESS_KEY_ID'),
+              "secret_key": os.environ.get('AWS_SECRET_ACCESS_KEY'),
+             "bucket_name": os.environ.get('AWS_STORAGE_BUCKET_NAME'),
+              "region_name": "us-east-2",
+             "signature_version": "s3v4",
         },
-        "staticfiles": {
-            "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
-        },
-    }
+    },
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
 
 
 # 4. Tell Django to use S3 for Media Files
