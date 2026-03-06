@@ -52,7 +52,11 @@ if USE_S3:
                 "bucket_name": os.environ.get('AWS_STORAGE_BUCKET_NAME'),
                 "region_name": "us-east-2", # Match your Ohio bucket
             },
-        }
+        },
+        # ADD THIS SECTION TO FIX THE ERROR
+        "staticfiles": {
+            "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+        },
     }
 
 # 2. AWS Credentials
