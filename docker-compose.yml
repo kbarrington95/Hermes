@@ -1,0 +1,89 @@
+version: '3.9'
+services:
+  web:
+    build: .
+    command: ./wait-for-it.sh mysql:3306 -- ./docker-entrypoint.sh
+    ports:
+      - 8000:8000
+    depends_on:
+      - redis
+      - mysql
+    restart: on-failure
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+  mysql:
+    image: mysql:8.0
+    ports:
+      - 3306:3306
+    restart: always
+    environment:
+      - MYSQL_DATABASE=storefront3
+      - MYSQL_ROOT_PASSWORD=kabkard
+    volumes:
+      - mysqldata:/var/lib/mysql     
+  redis:
+    image: redis:6.2-alpine
+    ports:
+      - 6379:6379
+    restart: always
+    volumes:
+      - redisdata:/data
+  smtp4dev:
+    image: rnwood/smtp4dev:v3
+    ports:
+      - 5000:80
+      - 25:25
+    restart: always
+  celery:
+    build: .
+    command: celery -A storefront worker --loglevel=info
+    depends_on:
+      - redis
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+  celery-beat:
+    build: .
+    command: celery -A storefront beat --loglevel=info
+    depends_on:
+      - redis
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+  flower:
+    build: .
+    command: celery -A storefront flower
+    depends_on:
+      - web
+      - redis
+      - celery
+    environment:
+      - DEBUG=1
+      - CELERY_BROKER=redis://redis:6379/0
+      - CELERY_BACKEND=redis://redis:6379/0
+    ports:
+      - 5555:5555
+    env_file:
+      - .env
+  tests:
+    build: .
+    command: ./wait-for-it.sh mysql:3306 -- pytest
+    depends_on:
+      - redis
+      - mysql
+    tty: true
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+volumes:
+  mysqldata:
+  pgdata:
+  redisdata:
+networks:
+  default:
+    enable_ipv6: false
