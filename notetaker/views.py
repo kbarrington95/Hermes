@@ -113,7 +113,7 @@ class TranscriptionViewSet(ModelViewSet):
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filterset_fields = ['recording_id']
     search_fields = ['raw_text', 'assembly_id']
-    ordering_fields = ['processed_at']
+    ordering_fields = ['submitted_at']
 
     def get_serializer_context(self):
         return {'request': self.request}

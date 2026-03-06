@@ -21,7 +21,7 @@ class RecordingAdmin(admin.ModelAdmin):
 
 @admin.register(Transcription)
 class TranscriptionAdmin(admin.ModelAdmin):
-    list_display = ('id', 'recording', 'assembly_id', 'processed_at')
+    list_display = ('id', 'recording', 'assembly_id', 'submitted_at')
     search_fields = ('assembly_id', 'raw_text')
     
 

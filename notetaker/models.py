@@ -126,11 +126,25 @@ class Transcription(models.Model):
     recording = models.OneToOneField(Recording, on_delete=models.CASCADE, related_name='transcription')
     assembly_id = models.CharField(max_length=100, unique=True)
     raw_text = models.TextField()
+    submitted_at = models.DateTimeField(auto_now_add=True)
+    completed_at = models.DateTimeField(null=True, blank=True)
+    processing_duration = models.DurationField(null=True, blank=True)
     
     # Store JSON data if you want to keep word-level timestamps or speaker data separately
     #utterances_json = models.JSONField(null=True, blank=True) 
     
-    processed_at = models.DateTimeField(auto_now_add=True)
+    class Status(models.TextChoices):
+        PENDING = 'PENDING', 'Pending'
+        PROCESSING = 'PROCESSING', 'Processing'
+        COMPLETED = 'COMPLETED', 'Completed'
+        FAILED = 'FAILED', 'Failed'
+
+    status = models.CharField(
+        max_length=20,
+        choices=Status.choices,
+        default=Status.PENDING
+    )
+    
 
 class Summary(models.Model):
     """
