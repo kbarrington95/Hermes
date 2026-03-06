@@ -6,50 +6,48 @@ from .services import AssemblyAIService, GeminiService
 @shared_task
 def process_transcription(recording_id):
     """
-    Background task to process a recording through AssemblyAI and save it to the DB.
+    Fire-and-forget task to submit a recording to AssemblyAI.
+    The actual saving of text happens later in the Webhook view.
     """
+    recording = None
+    transcription = None
     try:
         recording = Recording.objects.get(id=recording_id)
+        transcription = recording.transcription #type:ignore
 
-        # 1. Try to get a URL (Works for S3/Cloud)
-        # 2. Fall back to .path (Works for Local/Austin dev)
+        # 1. Try to get a URL (Works for S3/Cloud) - Fall back to .path (Works for Local dev)
         try:
             audio_source = recording.audio_file.url
-            # Check if it's a relative local URL (e.g., /media/...) 
-            # AssemblyAI needs a full path or a full remote URL
             if audio_source.startswith('/'):
                 audio_source = recording.audio_file.path
         except (NotImplementedError, AttributeError):
             audio_source = recording.audio_file.path
 
-        # Now the task doesn't care IF it's S3 or local, 
-        # it just cares about getting a valid string for the service.
-        transcript = AssemblyAIService.transcribe(audio_source)
-        
-        # 3. If you want to save the JSON utterances, extract them into a list of dicts
-        utterances_data = None
-        if getattr(transcript, 'utterances', None):
-             # AssemblyAI utterances are objects, we convert them to dictionaries for JSONField
-             utterances_data = [
-                 {"speaker": u.speaker, "text": u.text, "start": u.start, "end": u.end} 
-                 for u in transcript.utterances #type:ignore
-             ]
+        # 2. Build the webhook URL (using your Ngrok address from dev.py)
+        webhook_url = f"{settings.WEBHOOK_BASE_URL}/notetaker/webhooks/assemblyai/"
 
-        # 4. Create the Transcription record
-        Transcription.objects.create(
-            recording=recording,
-            assembly_id=transcript.id,  # Capturing the required ID
-            raw_text=transcript.text,
-            #utterances_json=utterances_data
-        )
+        # 3. Submit to AssemblyAI (Using the new .submit() service)
+        # This returns an ID immediately, no waiting.
+        transcript_info = AssemblyAIService.submit_transcription(audio_source, webhook_url)
+
+        # 4. UPDATE the existing record instead of creating a new one
+        transcription.assembly_id = transcript_info.id
+        transcription.status = Transcription.Status.PROCESSING
+        transcription.save()
         
-        return f"Successfully transcribed recording {recording_id}"
+        return f"Successfully submitted recording {recording_id} to AssemblyAI (ID: {transcript_info.id})"
 
     except Recording.DoesNotExist:
         return f"Error: Recording {recording_id} not found."
+    except Transcription.DoesNotExist:
+        return f"Error: Transcription record not found for recording {recording_id}."
     except Exception as e:
-        return f"Transcription failed: {str(e)}"
-    
+        # Only attempt to save if transcription was successfully fetched
+        if transcription:
+            transcription.status = Transcription.Status.FAILED
+            transcription.save()
+        return f"Submission failed: {str(e)}"
+
 
 @shared_task
 def process_summary(transcription_id):

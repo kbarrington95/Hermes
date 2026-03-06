@@ -1,7 +1,10 @@
 from django.shortcuts import get_object_or_404
+from django.conf import settings
 from django_filters.rest_framework import DjangoFilterBackend
 from django.db.models.aggregates import Count
 from django.utils import timezone
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
 from rest_framework.decorators import action
 from rest_framework import status
 from rest_framework.response import Response
@@ -96,10 +99,18 @@ class RecordingViewSet(ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        # 2. Trigger the background task, passing ONLY the ID
+        # 2. CREATE THE PENDING RECORD FIRST
+        # This acts as our "placeholder" while AssemblyAI works.
+        # We don't have an assembly_id yet, so we leave it blank for now.
+        Transcription.objects.create(
+            recording=recording,
+            status=Transcription.Status.PENDING
+        )
+
+        # 3. Trigger the background task, passing ONLY the ID
         process_transcription.delay(recording.id)  # type: ignore
 
-        # 3. Immediately respond so the user isn't kept waiting
+        # 4. Immediately respond so the user isn't kept waiting
         return Response(
             {"message": "Transcription sent to background worker. Check back soon!"},
             status=status.HTTP_202_ACCEPTED
@@ -189,3 +200,54 @@ class SubscriptionViewSet(ModelViewSet):
             serializer.save()
             return Response(serializer.data)
         
+@method_decorator(csrf_exempt, name='dispatch')
+class WebhookViewSet(GenericViewSet):
+    """
+    ViewSet to handle external incoming signals (Webhooks).
+    URL: POST /api/webhooks/assemblyai/
+    """
+    queryset = Transcription.objects.all()
+    permission_classes = [AllowAny] # Essential for external services
+
+    @action(detail=False, methods=['POST'])
+    def assemblyai(self, request):
+        # 1. Extract the tracking data from AssemblyAI
+        transcript_id = request.data.get('transcript_id')
+        status_report = request.data.get('status')
+
+        if status_report == 'completed':
+            # 2. Find the record we created in our 'transcribe' action
+            transcription = get_object_or_404(Transcription, assembly_id=transcript_id)
+            
+            # 3. Use the SDK to pull the finished text
+            import assemblyai as aai
+            aai.settings.api_key = settings.ASSEMBLY_AI_API_KEY
+            transcript = aai.Transcript.get_by_id(transcript_id)
+
+            # 4. Update the record with the final data
+            if transcript.text:
+                transcription.raw_text = transcript.text
+            transcription.status = Transcription.Status.COMPLETED
+            transcription.completed_at = timezone.now()
+            
+            # Calculate duration for your new DurationField
+            start = transcription.submitted_at
+            end = transcription.completed_at
+
+            if start and end:
+                transcription.processing_duration = end - start
+            
+            transcription.save()
+
+            # 5. AUTOMATION: Kick off the Gemini summary immediately
+            process_summary.delay(transcription.id) # type: ignore
+
+            return Response({"status": "success"}, status=status.HTTP_200_OK)
+
+        elif status_report == 'error':
+            # Handle potential failures gracefully
+            Transcription.objects.filter(assembly_id=transcript_id).update(
+                status=Transcription.Status.FAILED
+            )
+
+        return Response({"status": "received"}, status=status.HTTP_200_OK)

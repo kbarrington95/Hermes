@@ -6,39 +6,58 @@ from django.conf import settings
 class AssemblyAIService:
     
     @staticmethod
-    def transcribe(audio_source): # Renamed from file_path to reflect URL/Path flexibility
-        """
-        Uses the SDK to transcribe the file or URL.
-        Blocking call - will wait for completion.
-        """
-        # --- NEW CODE ADDED ---
-        # Explicitly set the API key from your environment-aware settings
+    def submit_transcription(audio_source, webhook_url):
         aai.settings.api_key = settings.ASSEMBLY_AI_API_KEY
-        # ----------------------
         
-        # 1. Configuration
+        # Configure your custom D&D vocabulary for Zaki, Ool, etc.
         config = aai.TranscriptionConfig(
             speech_model=aai.SpeechModel.best,
             speaker_labels=True,
-            # Boosted terms for your specific campaign
-            word_boost=["Zaki", "Ool", "Alis", "Sama", "Grunk", "Illithinoch"]
+            word_boost=["Zaki", "Ool", "Alis", "Sama", "Grunk", "Illithinoch"],
+            webhook_url=webhook_url  # <--- THE KEY ADDITION
         )
 
-        # 2. Transcribe
         transcriber = aai.Transcriber()
         
-        try:
-            # The SDK detects if audio_source is a local path or an S3 URL
-            # It handles upload + polling automatically
-            transcript = transcriber.transcribe(audio_source, config=config)
-            
-            if transcript.status == aai.TranscriptStatus.error:
-                 raise Exception(f"AssemblyAI Error: {transcript.error}")
-                 
-            return transcript 
+        # .submit() returns a 'queued' transcript object INSTANTLY
+        transcript_info = transcriber.submit(audio_source, config=config)
+        
+        return transcript_info
+    
+    # @staticmethod
+    # def transcribe(audio_source): # Renamed from file_path to reflect URL/Path flexibility
+    #     """
+    #     Uses the SDK to transcribe the file or URL.
+    #     Blocking call - will wait for completion.
+    #     """
+    #     # --- NEW CODE ADDED ---
+    #     # Explicitly set the API key from your environment-aware settings
+    #     aai.settings.api_key = settings.ASSEMBLY_AI_API_KEY
+    #     # ----------------------
+        
+    #     # 1. Configuration
+    #     config = aai.TranscriptionConfig(
+    #         speech_model=aai.SpeechModel.best,
+    #         speaker_labels=True,
+    #         # Boosted terms for your specific campaign
+    #         word_boost=["Zaki", "Ool", "Alis", "Sama", "Grunk", "Illithinoch"]
+    #     )
 
-        except Exception as e:
-            raise Exception(f"Transcription failed: {str(e)}")
+    #     # 2. Transcribe
+    #     transcriber = aai.Transcriber()
+        
+    #     try:
+    #         # The SDK detects if audio_source is a local path or an S3 URL
+    #         # It handles upload + polling automatically
+    #         transcript = transcriber.transcribe(audio_source, config=config)
+            
+    #         if transcript.status == aai.TranscriptStatus.error:
+    #              raise Exception(f"AssemblyAI Error: {transcript.error}")
+                 
+    #         return transcript 
+
+    #     except Exception as e:
+    #         raise Exception(f"Transcription failed: {str(e)}")
         
 class GeminiService:
     

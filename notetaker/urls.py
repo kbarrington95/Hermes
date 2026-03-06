@@ -15,6 +15,7 @@ router.register('summaries', views.SummaryViewSet)
 router.register('vocabulary', views.CustomVocabularyViewSet)
 router.register('subscription', views.SubscriptionViewSet)
 router.register('recordings', views.RecordingViewSet, basename='recordings')
+router.register('webhooks', views.WebhookViewSet, basename='webhooks')
 
 
 # Define the URL patterns
