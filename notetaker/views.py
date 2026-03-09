@@ -235,7 +235,11 @@ class WebhookViewSet(GenericViewSet):
             end = transcription.completed_at
 
             if start and end:
-                transcription.processing_duration = end - start
+                full_duration = end - start
+                # Create a clean duration by stripping microseconds
+                transcription.processing_duration = timezone.timedelta(
+                    seconds=int(full_duration.total_seconds())
+                )
             
             transcription.save()
 
