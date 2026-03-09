@@ -1,4 +1,3 @@
-version: '3.9'
 services:
   web:
     build: .
@@ -80,6 +79,16 @@ services:
       - .:/app
     env_file:
       - .env
+  ngrok:
+    image: ngrok/ngrok:latest
+    restart: always
+    command:
+      - "http"
+      - "web:8000"  # Pointing to your Django service name and port
+    environment:
+      - NGROK_AUTHTOKEN=1kRPEsLcM2LKpZBIzYDihB2Xzh3_2acE73DYkECx7X2qc3ehG
+    ports:
+      - "4040:4040" # So you can still access the dashboard at localhost:4040
 volumes:
   mysqldata:
   pgdata:
@@ -87,3 +96,4 @@ volumes:
 networks:
   default:
     enable_ipv6: false
+

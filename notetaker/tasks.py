@@ -28,6 +28,7 @@ def process_transcription(recording_id):
 
         # 3. Submit to AssemblyAI (Using the new .submit() service)
         # This returns an ID immediately, no waiting.
+        print(f"DEBUG: Sending webhook URL: {webhook_url}")
         transcript_info = AssemblyAIService.submit_transcription(audio_source, webhook_url)
 
         # 4. UPDATE the existing record instead of creating a new one
