@@ -1,5 +1,7 @@
 from django.contrib import admin
 from django.utils.safestring import mark_safe
+from django.urls import reverse
+from django.utils.html import format_html
 import markdown
 from .models import Campaign, Session, Recording, Transcription, Summary, CustomVocabulary, Subscription
 
@@ -8,21 +10,99 @@ class CampaignAdmin(admin.ModelAdmin):
     list_display = ('name', 'created_at', 'description')
     search_fields = ('name',)
 
+class RecordingInline(admin.TabularInline):
+    model = Recording
+    extra = 0
+    fields = ('audio_file', 'uploaded_at')
+    readonly_fields = ('audio_file', 'uploaded_at')
+
+class TranscriptionInline(admin.StackedInline):
+    model = Transcription
+    extra = 0
+    fields = ('status', 'assembly_id', 'processing_duration', 'raw_text')
+    readonly_fields = ('raw_text', 'processing_duration')
+
+class SummaryInline(admin.StackedInline):
+    model = Summary
+    extra = 0
+    fields = ('id', 'summary_type', 'model_used', 'content')
+    readonly_fields = ('content',) 
+
+# notetaker/admin.py
+
 @admin.register(Session)
 class SessionAdmin(admin.ModelAdmin):
-    list_display = ('title', 'campaign', 'date_played')
+    list_display = ('title', 'campaign', 'date_played', 'has_summary')
     list_filter = ('campaign', 'date_played')
     search_fields = ('title', 'description')
+    
+    # 1. Add RecordingInline so you can manage the file here
+    inlines = [RecordingInline]
+
+    # 2. Add these methods to readonly_fields to display them on the page
+    readonly_fields = ('display_transcription', 'display_summary')
+
+    def has_summary(self, obj):
+        """
+        Checks if at least one summary exists for this session's recording.
+        """
+        try:
+            # We follow the chain to the transcription
+            # Then check if the 'summaries' set has any records
+            return obj.recording.transcription.summaries.exists()
+        except (AttributeError, Recording.DoesNotExist, Transcription.DoesNotExist):
+            # Returns False if any part of the chain (Recording or Transcription) is missing
+            return False
+            
+    has_summary.boolean = True
+    has_summary.short_description = 'Summarized?'
+
+    def display_transcription(self, obj):
+        try:
+            # Follow the chain: Session -> Recording -> Transcription
+            transcription_id = obj.recording.transcription.id
+            
+            # Generate the URL for the Transcription "Change" page in Admin
+            url = reverse('admin:notetaker_transcription_change', args=[transcription_id])
+            
+            return format_html('<a href="{}">View Full Session Transcription</a>', url)
+        except (AttributeError, Recording.DoesNotExist, Transcription.DoesNotExist):
+            return "No transcription available yet."
+    
+    display_transcription.short_description = "Transcription"
+
+    def display_summary(self, obj):
+        try:
+            # 1. Access the OneToOne recording
+            recording = obj.recording 
+            # 2. Access the OneToOne transcription
+            transcription = recording.transcription 
+            # 3. Access the first summary from the 'summaries' related_name
+            # NOTE: Because it's a ForeignKey, it's transcription.summaries, not transcription.summary
+            summary = transcription.summaries.first() 
+
+            if summary and summary.content:
+                html = markdown.markdown(summary.content)
+                return mark_safe(html)
+            
+            return "Summary pending or not yet generated."
+        except (AttributeError, Recording.DoesNotExist, Transcription.DoesNotExist):
+            return "Chain incomplete (No recording or transcription yet)."
+    
+    display_summary.short_description = "Gemini Summary"
+
 
 @admin.register(Recording)
 class RecordingAdmin(admin.ModelAdmin):
     list_display = ('id', 'session', 'duration_seconds', 'uploaded_at')
     list_filter = ('session__campaign',)
+    inlines = [TranscriptionInline]
 
 @admin.register(Transcription)
 class TranscriptionAdmin(admin.ModelAdmin):
     list_display = ('id', 'recording', 'assembly_id', 'submitted_at')
     search_fields = ('assembly_id', 'raw_text')
+    inlines = [SummaryInline]
     
 
 @admin.register(Summary)
