@@ -9,7 +9,7 @@ GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 
 # The leading dot is a wildcard for any ngrok subdomain.
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0', '.ngrok-free.app']
-WEBHOOK_BASE_URL = "https://7eba-107-209-248-174.ngrok-free.app"
+WEBHOOK_BASE_URL = "https://e023-107-209-248-174.ngrok-free.app"
 
 
 DATABASES = {

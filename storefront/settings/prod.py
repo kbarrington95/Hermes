@@ -13,6 +13,7 @@ ASSEMBLY_AI_API_KEY = os.environ['ASSEMBLY_AI_API_KEY']
 GEMINI_API_KEY = os.environ['GEMINI_API_KEY']
 
 ALLOWED_HOSTS = ['hermes-prod-c391af873af7.herokuapp.com']
+WEBHOOK_BASE_URL = "https://hermes-prod-c391af873af7.herokuapp.com"
 
 DATABASES = {
     'default': dj_database_url.config()
