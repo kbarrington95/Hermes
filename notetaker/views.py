@@ -204,7 +204,7 @@ class SubscriptionViewSet(ModelViewSet):
 class WebhookViewSet(GenericViewSet):
     """
     ViewSet to handle external incoming signals (Webhooks).
-    URL: POST /api/webhooks/assemblyai/
+    URL: POST /webhooks/assemblyai/
     """
     queryset = Transcription.objects.all()
     permission_classes = [AllowAny] # Essential for external services
