@@ -22,6 +22,7 @@ async function loadSession() {
     document.getElementById('back-link').href = `/notetaker/campaign/${session.campaign}/`;
 
     document.getElementById('loading-msg').remove();
+    document.getElementById('delete-btn').style.display = 'block';
 
     if (session.recording) {
         showRecording(session.recording);
@@ -84,6 +85,19 @@ async function loadSummary(transcriptionId) {
     meta.textContent = `${summary.summary_type} · ${summary.model_used} · ${new Date(summary.created_at).toLocaleDateString()}`;
     content.innerHTML = marked.parse(summary.content);
     section.style.display = 'block';
+}
+
+async function deleteSession() {
+    const title = document.getElementById('session-title').textContent;
+    const campaignHref = document.getElementById('back-link').href;
+    if (!confirm(`Delete "${title}"? This will also remove its recording, transcription, and summary. This cannot be undone.`)) return;
+
+    const res = await fetch(`/notetaker/sessions/${sessionId}/`, { method: 'DELETE', headers });
+    if (res.ok || res.status === 204) {
+        window.location.href = campaignHref;
+    } else {
+        alert('Failed to delete session. Please try again.');
+    }
 }
 
 loadSession();

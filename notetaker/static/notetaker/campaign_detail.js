@@ -45,14 +45,32 @@ async function loadSessions() {
             : `<span class="badge badge-muted">No recording</span>`;
 
         return `
-        <a href="/notetaker/session/${s.id}/" class="campaign-card card">
+        <div class="campaign-card card" id="session-card-${s.id}">
             <div class="campaign-card-header">
-                <h3 class="campaign-name">${s.title}</h3>
+                <a href="/notetaker/session/${s.id}/" style="flex:1; text-decoration:none; color:inherit;">
+                    <h3 class="campaign-name">${s.title}</h3>
+                </a>
                 ${statusBadge}
+                <button class="btn btn-danger" style="margin-left:12px; font-size:12px; padding:4px 10px;" onclick="deleteSession(${s.id}, '${s.title.replace(/'/g, "\\'")}')">Delete</button>
             </div>
             <p class="campaign-desc text-muted">${s.date_played}</p>
-        </a>`;
+        </div>`;
     }).join('');
+}
+
+async function deleteSession(sessionId, title) {
+    if (!confirm(`Delete "${title}"? This cannot be undone.`)) return;
+
+    const res = await fetch(`/notetaker/sessions/${sessionId}/`, { method: 'DELETE', headers });
+    if (res.ok || res.status === 204) {
+        document.getElementById(`session-card-${sessionId}`)?.remove();
+        const list = document.getElementById('sessions-list');
+        if (list && list.children.length === 0) {
+            list.innerHTML = `<p class="text-muted">No sessions yet. Upload a recording to get started.</p>`;
+        }
+    } else {
+        alert('Failed to delete session. Please try again.');
+    }
 }
 
 loadCampaign();

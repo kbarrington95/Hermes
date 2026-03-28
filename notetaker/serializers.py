@@ -98,10 +98,13 @@ class CampaignSerializer(serializers.ModelSerializer):
 
 class SubscriptionSerializer(serializers.ModelSerializer):
     user_id = serializers.IntegerField(read_only=True)
-    
+
     class Meta:
         model = Subscription
-        fields = ['id', 
+        fields = ['id',
                   'user_id',
                   'status',
-                  'plan_tier']
+                  'plan_tier',
+                  'monthly_audio_minutes_used',
+                  'audio_minutes_limit',
+                  'summaries_generated_count']

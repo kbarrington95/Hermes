@@ -1,0 +1,58 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}Subscription — Hermes{% endblock %}
+
+{% block styles %}<link rel="stylesheet" href="{% static 'notetaker/styles.css' %}">{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="page-title">Subscription</h1>
+</div>
+
+<div class="dashboard-col" id="sub-content" style="display:none;">
+
+    <!-- Plan tier card -->
+    <div class="card mb-24">
+        <div class="sub-plan-header">
+            <div>
+                <p class="sub-label">Current Plan</p>
+                <h2 class="sub-plan-name" id="plan-name">—</h2>
+            </div>
+            <span class="sub-status-badge" id="plan-status"></span>
+        </div>
+    </div>
+
+    <!-- Usage card -->
+    <div class="card mb-24">
+        <h3 class="mt-0">Usage this month</h3>
+
+        <p class="quota-label">Audio minutes</p>
+        <div class="quota-bar-track">
+            <div class="quota-bar-fill" id="minutes-bar"></div>
+        </div>
+        <p class="quota-text text-muted mb-24" id="minutes-text"></p>
+
+        <p class="quota-label">Summaries generated</p>
+        <div class="quota-bar-track">
+            <div class="quota-bar-fill" id="summaries-bar"></div>
+        </div>
+        <p class="quota-text text-muted" id="summaries-text"></p>
+    </div>
+
+    <!-- Upgrade CTA -->
+    <div class="card sub-upgrade-card" id="upgrade-card" style="display:none;">
+        <h3 class="mt-0">Upgrade your plan</h3>
+        <p class="text-muted">Get more audio minutes, unlimited summaries, and custom vocabulary boosts.</p>
+        <button class="btn btn-primary" disabled>Upgrade — Coming Soon</button>
+    </div>
+
+</div>
+
+<p class="text-muted" id="loading-msg">Loading subscription…</p>
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'core/auth.js' %}"></script>
+<script src="{% static 'notetaker/subscription.js' %}"></script>
+{% endblock %}
