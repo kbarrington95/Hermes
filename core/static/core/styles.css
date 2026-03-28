@@ -138,6 +138,26 @@ a:hover { text-decoration: underline; }
     color: #fff;
 }
 
+/* ── Form controls ─────────────────────────────────────────── */
+.form-control {
+    display: block;
+    width: 100%;
+    padding: 8px 12px;
+    font-size: 15px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    background: var(--color-surface);
+    color: var(--color-text);
+    outline: none;
+}
+
+.form-control:focus {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(30,200,170,0.15);
+}
+
+.mb-8 { margin-bottom: 8px; }
+
 /* ── Hero (landing page) ───────────────────────────────────── */
 .hero {
     display: flex;

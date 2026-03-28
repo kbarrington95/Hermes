@@ -7,15 +7,28 @@
 
 {% block content %}
 <div class="page-header">
-    <div>
+    <div style="flex:1;">
         <a href="/notetaker/dashboard/" class="back-link">← Campaigns</a>
-        <h1 class="page-title" id="campaign-name">Loading…</h1>
-        <p class="text-muted" id="campaign-desc"></p>
+
+        <!-- View mode -->
+        <div id="campaign-view">
+            <h1 class="page-title" id="campaign-name">Loading…</h1>
+            <p class="text-muted" id="campaign-desc"></p>
+        </div>
+
+        <!-- Edit mode -->
+        <div id="campaign-edit" style="display:none;">
+            <input class="form-control mb-8" id="edit-name" type="text" placeholder="Campaign name">
+            <input class="form-control" id="edit-desc" type="text" placeholder="Description (optional)">
+        </div>
     </div>
-    <div style="display:flex; gap:8px;">
+    <div style="display:flex; gap:8px; align-items:flex-start; flex-shrink:0;">
         <a class="btn btn-primary" id="upload-btn" href="#">+ Upload Recording</a>
         <a class="btn btn-outline" id="vocab-btn" href="#">Vocabulary</a>
-        <button class="btn btn-danger" onclick="deleteCampaign()">Delete Campaign</button>
+        <button class="btn btn-outline" id="edit-btn" onclick="startEdit()">Edit</button>
+        <button class="btn btn-primary" id="save-btn" style="display:none;" onclick="saveEdit()">Save</button>
+        <button class="btn btn-outline" id="cancel-btn" style="display:none;" onclick="cancelEdit()">Cancel</button>
+        <button class="btn btn-danger" onclick="deleteCampaign()">Delete</button>
     </div>
 </div>
 

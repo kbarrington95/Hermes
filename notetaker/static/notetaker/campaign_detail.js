@@ -58,6 +58,44 @@ async function loadSessions() {
     }).join('');
 }
 
+function startEdit() {
+    document.getElementById('edit-name').value = document.getElementById('campaign-name').textContent;
+    document.getElementById('edit-desc').value = document.getElementById('campaign-desc').textContent;
+    document.getElementById('campaign-view').style.display = 'none';
+    document.getElementById('campaign-edit').style.display = 'block';
+    document.getElementById('edit-btn').style.display = 'none';
+    document.getElementById('save-btn').style.display = 'block';
+    document.getElementById('cancel-btn').style.display = 'block';
+    document.getElementById('edit-name').focus();
+}
+
+function cancelEdit() {
+    document.getElementById('campaign-edit').style.display = 'none';
+    document.getElementById('campaign-view').style.display = 'block';
+    document.getElementById('edit-btn').style.display = 'block';
+    document.getElementById('save-btn').style.display = 'none';
+    document.getElementById('cancel-btn').style.display = 'none';
+}
+
+async function saveEdit() {
+    const name = document.getElementById('edit-name').value.trim();
+    if (!name) { alert('Campaign name is required.'); return; }
+    const description = document.getElementById('edit-desc').value.trim();
+
+    const res = await fetch(`/notetaker/campaigns/${campaignId}/`, {
+        method: 'PATCH',
+        headers,
+        body: JSON.stringify({ name, description }),
+    });
+    if (!res.ok) { alert('Failed to save changes. Please try again.'); return; }
+
+    const updated = await res.json();
+    document.getElementById('campaign-name').textContent = updated.name;
+    document.getElementById('campaign-desc').textContent = updated.description || '';
+    document.title = `${updated.name} — Hermes`;
+    cancelEdit();
+}
+
 async function deleteCampaign() {
     const name = document.getElementById('campaign-name').textContent;
     if (!confirm(`Delete "${name}"? This will also remove all its sessions, recordings, transcriptions, and summaries. This cannot be undone.`)) return;
