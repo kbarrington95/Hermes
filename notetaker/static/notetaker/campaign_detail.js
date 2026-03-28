@@ -60,7 +60,10 @@ async function loadSessions() {
 
 function startEdit() {
     document.getElementById('edit-name').value = document.getElementById('campaign-name').textContent;
-    document.getElementById('edit-desc').value = document.getElementById('campaign-desc').textContent;
+    const desc = document.getElementById('edit-desc');
+    desc.value = document.getElementById('campaign-desc').textContent;
+    desc.style.height = 'auto';
+    desc.style.height = (desc.scrollHeight || 60) + 'px';
     document.getElementById('campaign-view').style.display = 'none';
     document.getElementById('campaign-edit').style.display = 'block';
     document.getElementById('edit-btn').style.display = 'none';

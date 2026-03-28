@@ -10,20 +10,42 @@
 
 {% block content %}
 <div id="session-header" class="page-header">
-    <div>
+    <div style="flex:1;">
         <a class="back-link" id="back-link" href="/notetaker/dashboard/">← Campaign</a>
-        <h1 class="page-title" id="session-title">Loading…</h1>
-        <p class="text-muted" id="session-date"></p>
+
+        <!-- View mode -->
+        <div id="session-view">
+            <h1 class="page-title" id="session-title">Loading…</h1>
+            <p class="text-muted" id="session-date"></p>
+        </div>
+
+        <!-- Edit mode -->
+        <div id="session-edit" style="display:none;">
+            <input class="form-control" id="edit-title" type="text" placeholder="Session title">
+        </div>
     </div>
-    <button class="btn btn-danger" id="delete-btn" style="display:none;" onclick="deleteSession()">Delete Session</button>
+    <div style="display:flex; gap:8px; align-items:flex-start; flex-shrink:0;">
+        <button class="btn btn-outline" id="edit-session-btn" style="display:none;" onclick="startSessionEdit()">Edit</button>
+        <button class="btn btn-primary" id="save-session-btn" style="display:none;" onclick="saveSessionEdit()">Save</button>
+        <button class="btn btn-outline" id="cancel-session-btn" style="display:none;" onclick="cancelSessionEdit()">Cancel</button>
+        <button class="btn btn-danger" id="delete-btn" style="display:none;" onclick="deleteSession()">Delete Session</button>
+    </div>
 </div>
 
 <!-- Summary -->
 <div class="session-col">
     <section class="card session-section" id="summary-section" style="display:none;">
-        <h2 class="section-title mt-0">Session Summary</h2>
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:4px;">
+            <h2 class="section-title mt-0" style="margin-bottom:0;">Session Summary</h2>
+            <div style="display:flex; gap:8px;">
+                <button class="btn btn-outline btn-sm" id="edit-summary-btn" onclick="startSummaryEdit()">Edit</button>
+                <button class="btn btn-primary btn-sm" id="save-summary-btn" style="display:none;" onclick="saveSummaryEdit()">Save</button>
+                <button class="btn btn-outline btn-sm" id="cancel-summary-btn" style="display:none;" onclick="cancelSummaryEdit()">Cancel</button>
+            </div>
+        </div>
         <p class="text-muted summary-meta" id="summary-meta"></p>
         <div class="summary-content" id="summary-content"></div>
+        <textarea class="form-control summary-textarea" id="summary-textarea" style="display:none;" placeholder="Markdown content…"></textarea>
     </section>
 
     <!-- Transcription -->

@@ -13,13 +13,13 @@
         <!-- View mode -->
         <div id="campaign-view">
             <h1 class="page-title" id="campaign-name">Loading…</h1>
-            <p class="text-muted" id="campaign-desc"></p>
+            <p class="text-muted" id="campaign-desc" style="white-space: pre-wrap;"></p>
         </div>
 
         <!-- Edit mode -->
         <div id="campaign-edit" style="display:none;">
             <input class="form-control mb-8" id="edit-name" type="text" placeholder="Campaign name">
-            <input class="form-control" id="edit-desc" type="text" placeholder="Description (optional)">
+            <textarea class="form-control summary-textarea" id="edit-desc" placeholder="Description (optional)" rows="2"></textarea>
         </div>
     </div>
     <div style="display:flex; gap:8px; align-items:flex-start; flex-shrink:0;">

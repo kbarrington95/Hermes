@@ -8,6 +8,9 @@ const headers = { 'Authorization': `JWT ${token}`, 'Content-Type': 'application/
 // Get session ID from URL: /notetaker/sessions/<id>/
 const sessionId = window.location.pathname.split('/').filter(Boolean).pop();
 
+let summaryId = null;
+let summaryRawContent = '';
+
 async function loadSession() {
     const res = await fetch(`/notetaker/sessions/${sessionId}/`, { headers });
     if (res.status === 401) { Auth.requireAuth(); return; }
@@ -23,6 +26,7 @@ async function loadSession() {
 
     document.getElementById('loading-msg').remove();
     document.getElementById('delete-btn').style.display = 'block';
+    document.getElementById('edit-session-btn').style.display = 'block';
 
     if (session.recording) {
         showRecording(session.recording);
@@ -78,6 +82,9 @@ async function loadSummary(transcriptionId) {
     if (results.length === 0) return;
 
     const summary = results[0];
+    summaryId = summary.id;
+    summaryRawContent = summary.content;
+
     const section = document.getElementById('summary-section');
     const meta = document.getElementById('summary-meta');
     const content = document.getElementById('summary-content');
@@ -85,6 +92,82 @@ async function loadSummary(transcriptionId) {
     meta.textContent = `${summary.summary_type} · ${summary.model_used} · ${new Date(summary.created_at).toLocaleDateString()}`;
     content.innerHTML = marked.parse(summary.content);
     section.style.display = 'block';
+}
+
+// ── Session title edit ──────────────────────────────────────
+function startSessionEdit() {
+    document.getElementById('edit-title').value = document.getElementById('session-title').textContent;
+    document.getElementById('session-view').style.display = 'none';
+    document.getElementById('session-edit').style.display = 'block';
+    document.getElementById('edit-session-btn').style.display = 'none';
+    document.getElementById('save-session-btn').style.display = 'block';
+    document.getElementById('cancel-session-btn').style.display = 'block';
+    document.getElementById('edit-title').focus();
+}
+
+function cancelSessionEdit() {
+    document.getElementById('session-edit').style.display = 'none';
+    document.getElementById('session-view').style.display = 'block';
+    document.getElementById('edit-session-btn').style.display = 'block';
+    document.getElementById('save-session-btn').style.display = 'none';
+    document.getElementById('cancel-session-btn').style.display = 'none';
+}
+
+async function saveSessionEdit() {
+    const title = document.getElementById('edit-title').value.trim();
+    if (!title) { alert('Title is required.'); return; }
+
+    const res = await fetch(`/notetaker/sessions/${sessionId}/`, {
+        method: 'PATCH',
+        headers,
+        body: JSON.stringify({ title }),
+    });
+    if (!res.ok) { alert('Failed to save. Please try again.'); return; }
+
+    const updated = await res.json();
+    document.getElementById('session-title').textContent = updated.title;
+    document.title = `${updated.title} — Hermes`;
+    cancelSessionEdit();
+}
+
+// ── Summary edit ────────────────────────────────────────────
+function startSummaryEdit() {
+    const textarea = document.getElementById('summary-textarea');
+    textarea.value = summaryRawContent;
+    textarea.style.display = 'block';
+    // Auto-size to content height
+    textarea.style.height = 'auto';
+    textarea.style.height = textarea.scrollHeight + 'px';
+
+    document.getElementById('summary-content').style.display = 'none';
+    document.getElementById('edit-summary-btn').style.display = 'none';
+    document.getElementById('save-summary-btn').style.display = 'block';
+    document.getElementById('cancel-summary-btn').style.display = 'block';
+    textarea.focus();
+}
+
+function cancelSummaryEdit() {
+    document.getElementById('summary-textarea').style.display = 'none';
+    document.getElementById('summary-content').style.display = 'block';
+    document.getElementById('edit-summary-btn').style.display = 'block';
+    document.getElementById('save-summary-btn').style.display = 'none';
+    document.getElementById('cancel-summary-btn').style.display = 'none';
+}
+
+async function saveSummaryEdit() {
+    const content = document.getElementById('summary-textarea').value;
+
+    const res = await fetch(`/notetaker/summaries/${summaryId}/`, {
+        method: 'PATCH',
+        headers,
+        body: JSON.stringify({ content }),
+    });
+    if (!res.ok) { alert('Failed to save. Please try again.'); return; }
+
+    const updated = await res.json();
+    summaryRawContent = updated.content;
+    document.getElementById('summary-content').innerHTML = marked.parse(updated.content);
+    cancelSummaryEdit();
 }
 
 async function deleteSession() {
