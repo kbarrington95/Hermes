@@ -1,0 +1,29 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}Campaign — Hermes{% endblock %}
+
+{% block styles %}<link rel="stylesheet" href="{% static 'notetaker/styles.css' %}">{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <a href="/notetaker/dashboard/" class="back-link">← Campaigns</a>
+        <h1 class="page-title" id="campaign-name">Loading…</h1>
+        <p class="text-muted" id="campaign-desc"></p>
+    </div>
+    <a class="btn btn-primary" id="upload-btn" href="#">+ Upload Recording</a>
+</div>
+
+<div class="dashboard-col">
+    <h2 class="section-title">Sessions</h2>
+    <div id="sessions-list">
+        <p class="text-muted" id="loading-msg">Loading sessions…</p>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'core/auth.js' %}"></script>
+<script src="{% static 'notetaker/campaign_detail.js' %}"></script>
+{% endblock %}

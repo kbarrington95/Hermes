@@ -1,0 +1,48 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}Session — Hermes{% endblock %}
+
+{% block styles %}<link rel="stylesheet" href="{% static 'notetaker/styles.css' %}">{% endblock %}
+
+{% block content %}
+<div id="session-header" class="page-header">
+    <div>
+        <a class="back-link" id="back-link" href="/notetaker/dashboard/">← Campaign</a>
+        <h1 class="page-title" id="session-title">Loading…</h1>
+        <p class="text-muted" id="session-date"></p>
+    </div>
+</div>
+
+<!-- Summary -->
+<div class="session-col">
+    <section class="card session-section" id="summary-section" style="display:none;">
+        <h2 class="section-title mt-0">Session Summary</h2>
+        <p class="text-muted summary-meta" id="summary-meta"></p>
+        <div class="summary-content" id="summary-content"></div>
+    </section>
+
+    <!-- Transcription -->
+    <section class="card session-section" id="transcription-section" style="display:none;">
+        <h2 class="section-title mt-0">Transcription</h2>
+        <p class="text-muted" id="transcription-meta"></p>
+        <details>
+            <summary class="transcription-toggle">Show full transcript</summary>
+            <div class="transcription-text" id="transcription-text"></div>
+        </details>
+    </section>
+
+    <!-- Recording -->
+    <section class="card session-section" id="recording-section" style="display:none;">
+        <h2 class="section-title mt-0">Recording</h2>
+        <p class="text-muted" id="recording-meta"></p>
+    </section>
+
+    <p class="text-muted" id="loading-msg">Loading session…</p>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'core/auth.js' %}"></script>
+<script src="{% static 'notetaker/session_detail.js' %}"></script>
+{% endblock %}

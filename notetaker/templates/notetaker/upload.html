@@ -1,0 +1,71 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}Upload Recording — Hermes{% endblock %}
+
+{% block styles %}<link rel="stylesheet" href="{% static 'notetaker/styles.css' %}">{% endblock %}
+
+{% block content %}
+
+<!-- Upload Form -->
+<div id="upload-section">
+    <div class="page-header">
+        <h1 class="page-title">Upload Recording</h1>
+    </div>
+
+    <div class="upload-col">
+        <div class="card">
+            <div id="upload-error" class="alert alert-error" style="display:none;"></div>
+
+            <div class="form-group">
+                <label for="campaign-select">Campaign</label>
+                <select id="campaign-select" class="form-input">
+                    <option value="">Loading campaigns…</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="session-title">Session Title (optional)</label>
+                <input type="text" id="session-title" class="form-input" placeholder="e.g. The Dragon's Lair">
+            </div>
+            <div class="form-group">
+                <label for="session-date">Date Played (optional)</label>
+                <input type="date" id="session-date" class="form-input">
+            </div>
+            <div class="form-group">
+                <label for="audio-file">Audio File (.mp3)</label>
+                <input type="file" id="audio-file" class="form-input" accept=".mp3">
+            </div>
+
+            <button class="btn btn-primary" id="upload-btn">Upload & Transcribe</button>
+        </div>
+    </div>
+</div>
+
+<!-- Processing Spinner (hidden until upload completes) -->
+<div id="processing-section" style="display:none;">
+    <div class="upload-col">
+        <div class="card processing-card">
+            <div class="spinner"></div>
+            <h2 class="processing-title" id="processing-title">Uploading…</h2>
+            <p class="processing-sub text-muted" id="processing-sub">Please keep this page open.</p>
+            <div class="status-steps">
+                <div class="status-step" id="step-upload">
+                    <span class="step-icon">⏳</span> Uploading recording
+                </div>
+                <div class="status-step" id="step-transcribe">
+                    <span class="step-icon">⏳</span> Transcribing audio
+                </div>
+                <div class="status-step" id="step-summary">
+                    <span class="step-icon">⏳</span> Generating summary
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'core/auth.js' %}"></script>
+<script src="{% static 'notetaker/upload.js' %}"></script>
+{% endblock %}

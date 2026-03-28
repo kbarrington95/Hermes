@@ -1,4 +1,5 @@
 from django.urls import path
+from django.views.generic import TemplateView
 from rest_framework.routers import DefaultRouter
 from rest_framework_nested import routers
 from . import views
@@ -19,4 +20,9 @@ router.register('webhooks', views.WebhookViewSet, basename='webhooks')
 
 
 # Define the URL patterns
-urlpatterns = router.urls
+urlpatterns = [
+    path('dashboard/', TemplateView.as_view(template_name='notetaker/dashboard.html')),
+    path('upload/', TemplateView.as_view(template_name='notetaker/upload.html')),
+    path('campaign/<int:pk>/', TemplateView.as_view(template_name='notetaker/campaign_detail.html')),
+    path('session/<int:pk>/', TemplateView.as_view(template_name='notetaker/session_detail.html')),
+] + router.urls
