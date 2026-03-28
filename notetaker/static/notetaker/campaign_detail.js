@@ -58,6 +58,18 @@ async function loadSessions() {
     }).join('');
 }
 
+async function deleteCampaign() {
+    const name = document.getElementById('campaign-name').textContent;
+    if (!confirm(`Delete "${name}"? This will also remove all its sessions, recordings, transcriptions, and summaries. This cannot be undone.`)) return;
+
+    const res = await fetch(`/notetaker/campaigns/${campaignId}/`, { method: 'DELETE', headers });
+    if (res.ok || res.status === 204) {
+        window.location.href = '/notetaker/dashboard/';
+    } else {
+        alert('Failed to delete campaign. Please try again.');
+    }
+}
+
 async function deleteSession(sessionId, title) {
     if (!confirm(`Delete "${title}"? This cannot be undone.`)) return;
 
