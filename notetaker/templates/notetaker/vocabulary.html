@@ -1,0 +1,45 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}Vocabulary — Hermes{% endblock %}
+
+{% block styles %}<link rel="stylesheet" href="{% static 'notetaker/styles.css' %}">{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <a class="back-link" id="back-link" href="/notetaker/dashboard/">← Campaign</a>
+        <h1 class="page-title" id="campaign-name">Custom Vocabulary</h1>
+        <p class="text-muted">D&amp;D-specific terms sent to AssemblyAI to improve transcription accuracy.</p>
+    </div>
+</div>
+
+<div class="dashboard-col">
+
+    <!-- Add term form -->
+    <div class="card mb-24">
+        <h3 class="mt-0">Add Term</h3>
+        <div id="vocab-error" class="alert alert-error" style="display:none;"></div>
+        <div class="form-group">
+            <label for="term-input">Term</label>
+            <input type="text" id="term-input" class="form-input" placeholder="e.g. Zariel, Baldur's Gate">
+        </div>
+        <div class="form-group">
+            <label for="note-input">Note (optional)</label>
+            <input type="text" id="note-input" class="form-input" placeholder="e.g. NPC, Location, Spell">
+        </div>
+        <button class="btn btn-primary" id="add-term-btn">Add Term</button>
+    </div>
+
+    <!-- Vocabulary list -->
+    <div id="vocab-list">
+        <p class="text-muted" id="loading-msg">Loading vocabulary…</p>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'core/auth.js' %}"></script>
+<script src="{% static 'notetaker/vocabulary.js' %}"></script>
+{% endblock %}

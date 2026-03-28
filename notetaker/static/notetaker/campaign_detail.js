@@ -19,7 +19,7 @@ async function loadCampaign() {
         document.getElementById('campaign-desc').textContent = campaign.description;
     }
     document.getElementById('upload-btn').href = `/notetaker/upload/?campaign=${campaignId}`;
-
+    document.getElementById('vocab-btn').href = `/notetaker/campaign/${campaignId}/vocabulary/`;
     document.title = `${campaign.name} — Hermes`;
 }
 

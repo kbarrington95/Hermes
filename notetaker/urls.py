@@ -24,5 +24,6 @@ urlpatterns = [
     path('dashboard/', TemplateView.as_view(template_name='notetaker/dashboard.html')),
     path('upload/', TemplateView.as_view(template_name='notetaker/upload.html')),
     path('campaign/<int:pk>/', TemplateView.as_view(template_name='notetaker/campaign_detail.html')),
+    path('campaign/<int:pk>/vocabulary/', TemplateView.as_view(template_name='notetaker/vocabulary.html')),
     path('session/<int:pk>/', TemplateView.as_view(template_name='notetaker/session_detail.html')),
 ] + router.urls

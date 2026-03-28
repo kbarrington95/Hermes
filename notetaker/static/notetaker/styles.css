@@ -215,5 +215,41 @@
 .summary-content {
     font-size: 15px;
     line-height: 1.8;
-    white-space: pre-wrap;
 }
+
+.summary-content h1, .summary-content h2, .summary-content h3 {
+    margin: 16px 0 8px;
+}
+
+.summary-content p { margin: 0 0 12px; }
+
+.summary-content ul, .summary-content ol {
+    padding-left: 20px;
+    margin: 0 0 12px;
+}
+
+/* ── Vocabulary table ──────────────────────────────────────── */
+.vocab-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+.vocab-table th {
+    text-align: left;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--color-text-muted);
+    padding: 0 12px 10px 0;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.vocab-table td {
+    padding: 10px 12px 10px 0;
+    border-bottom: 1px solid var(--color-border);
+    vertical-align: middle;
+}
+
+.vocab-table tr:last-child td { border-bottom: none; }
+
+.vocab-term { font-weight: 600; }

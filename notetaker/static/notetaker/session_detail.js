@@ -82,7 +82,7 @@ async function loadSummary(transcriptionId) {
     const content = document.getElementById('summary-content');
 
     meta.textContent = `${summary.summary_type} · ${summary.model_used} · ${new Date(summary.created_at).toLocaleDateString()}`;
-    content.textContent = summary.content;  // plain text for now; Phase 5 adds markdown rendering
+    content.innerHTML = marked.parse(summary.content);
     section.style.display = 'block';
 }
 

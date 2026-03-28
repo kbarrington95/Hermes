@@ -5,7 +5,7 @@ from .models import Campaign, Session, Recording, Transcription, Summary, Custom
 class CustomVocabularySerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomVocabulary
-        fields = ['id', 'term', 'note']
+        fields = ['id', 'campaign', 'term', 'note']
 
 class SummarySerializer(serializers.ModelSerializer):
     # Walk up the tree to get parent IDs
@@ -86,7 +86,7 @@ class SessionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Session
-        fields = ['id', 'title', 'date_played', 'description', 'created_at', 'recording']
+        fields = ['id', 'campaign', 'title', 'date_played', 'description', 'created_at', 'recording']
 
 class CampaignSerializer(serializers.ModelSerializer):
     class Meta:
