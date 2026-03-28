@@ -1,4 +1,4 @@
-// dashboard.js — campaigns list + quota usage
+// dashboard.js — campaigns list
 
 Auth.requireAuth();
 
@@ -40,26 +40,14 @@ async function loadCampaigns() {
     `).join('');
 }
 
-// ── Quota ────────────────────────────────────────────────────
+// ── Subscription (needed for subscriptionId when creating campaigns) ──
 
 async function loadQuota() {
     const res = await fetch('/notetaker/subscription/me/', { headers });
     if (!res.ok) return;
 
     const sub = await res.json();
-    if (!sub) return;
-
-    subscriptionId = sub.id;
-
-    const used = parseFloat(sub.monthly_audio_minutes_used) || 0;
-    const limit = sub.audio_minutes_limit || 60;
-    const pct = Math.min((used / limit) * 100, 100).toFixed(0);
-
-    const card = document.getElementById('quota-card');
-    card.style.display = 'block';
-    document.getElementById('quota-bar').style.width = `${pct}%`;
-    document.getElementById('quota-text').textContent =
-        `${used.toFixed(1)} / ${limit} minutes used (${sub.plan_tier} plan)`;
+    if (sub) subscriptionId = sub.id;
 }
 
 // ── New campaign form ────────────────────────────────────────

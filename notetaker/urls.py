@@ -8,7 +8,7 @@ from . import views
 router = DefaultRouter()
 
 # The first argument is the URL prefix (e.g., 'campaigns' -> /campaigns/)
-router.register('campaigns', views.CampaignViewSet)
+router.register('campaigns', views.CampaignViewSet, basename='campaigns')
 router.register('sessions', views.SessionViewSet, basename='sessions')
 #router.register('recordings', views.RecordingViewSet)
 router.register('transcriptions', views.TranscriptionViewSet)

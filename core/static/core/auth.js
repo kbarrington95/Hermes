@@ -10,6 +10,7 @@ const Auth = {
     // Store user info after fetching /auth/users/me/
     setUser(data) {
         localStorage.setItem('user_email', data.email);
+        localStorage.setItem('user_username', data.username);
         localStorage.setItem('user_is_staff', data.is_staff ? '1' : '0');
     },
 

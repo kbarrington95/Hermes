@@ -37,25 +37,35 @@ from .serializers import (
 )
 
 class CampaignViewSet(ModelViewSet):
-    queryset = Campaign.objects.annotate(sessions_count=Count('sessions')).all()
     serializer_class = CampaignSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     search_fields = ['name', 'description']
     ordering_fields = ['name', 'created_at', 'sessions_count']
 
+    def get_queryset(self): #type:ignore
+        user = self.request.user
+        if user.is_staff:
+            return Campaign.objects.annotate(sessions_count=Count('sessions')).all()
+        return Campaign.objects.filter(subscription__user=user).annotate(sessions_count=Count('sessions'))
+
     def get_serializer_context(self):
         return {'request': self.request}
 
 
 class SessionViewSet(ModelViewSet):
-    queryset = Session.objects.select_related('campaign', 'recording').all()
     serializer_class = SessionSerializer
     permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filterset_fields = ['campaign_id']
     search_fields = ['title', 'description']
     ordering_fields = ['date_played', 'created_at']
+
+    def get_queryset(self): #type:ignore
+        user = self.request.user
+        if user.is_staff:
+            return Session.objects.select_related('campaign', 'recording').all()
+        return Session.objects.filter(campaign__subscription__user=user).select_related('campaign', 'recording')
 
     def get_serializer_context(self):
         return {'request': self.request}
