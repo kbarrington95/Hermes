@@ -101,6 +101,8 @@ a:hover { text-decoration: underline; }
     cursor: pointer;
     border: none;
     text-align: center;
+    line-height: 1.4;
+    box-sizing: border-box;
     transition: background 0.15s, color 0.15s;
     text-decoration: none;
 }
