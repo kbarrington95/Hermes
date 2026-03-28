@@ -16,6 +16,7 @@ media/
 
 #Other
 SQL SeedFiles/
+frontendMVP.md
 
 #Testing
 pytest.ini

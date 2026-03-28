@@ -1,15 +1,30 @@
+{% extends "core/base.html" %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <link rel="stylesheet" href="{% static 'core/styles.css' %}">
-</head>
-<body>
-    <div class="home-page">
-        <img src="{% static 'core/logo1.svg' %}" alt="Logo" class="logo">
+
+{% block title %}Hermes — D&D Session Transcription{% endblock %}
+
+{% block content %}
+<div class="hero">
+    <h1 class="hero-title">Never forget a session again.</h1>
+    <p class="hero-subtitle">Upload your D&amp;D recordings. Get transcriptions, speaker labels, and AI-generated summaries — tailored to your campaign.</p>
+    <div class="hero-actions">
+        <a href="/login/" class="btn btn-primary" id="hero-cta">Get Started</a>
     </div>
-</body>
-</html>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // If already logged in, redirect straight to dashboard
+    if (localStorage.getItem('access_token')) {
+        window.location.href = '/notetaker/dashboard/';
+    }
+
+    // Update CTA button if logged in (fallback)
+    const cta = document.getElementById('hero-cta');
+    if (cta && localStorage.getItem('access_token')) {
+        cta.textContent = 'Go to Dashboard';
+        cta.href = '/notetaker/dashboard/';
+    }
+</script>
+{% endblock %}
