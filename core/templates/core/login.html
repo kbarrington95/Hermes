@@ -1,0 +1,59 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}Login — Hermes{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-card card">
+        <h2 class="auth-title">Welcome back</h2>
+        <p class="auth-subtitle text-muted">Log in to your Hermes account</p>
+
+        <div id="error-msg" class="alert alert-error" style="display:none;"></div>
+
+        <form id="login-form">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" class="form-input" placeholder="dungeonmaster42" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" class="form-input" placeholder="••••••••" required>
+            </div>
+            <button type="submit" class="btn btn-primary btn-full" id="submit-btn">Log In</button>
+        </form>
+
+        <p class="auth-footer text-muted">
+            Don't have an account? <a href="/register/">Sign up</a>
+        </p>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'core/auth.js' %}"></script>
+<script>
+    Auth.requireGuest();
+
+    document.getElementById('login-form').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const btn = document.getElementById('submit-btn');
+        const errorMsg = document.getElementById('error-msg');
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+
+        btn.disabled = true;
+        btn.textContent = 'Logging in…';
+        errorMsg.style.display = 'none';
+
+        try {
+            await Auth.login(username, password);
+        } catch (err) {
+            errorMsg.textContent = err.message;
+            errorMsg.style.display = 'block';
+            btn.disabled = false;
+            btn.textContent = 'Log In';
+        }
+    });
+</script>
+{% endblock %}
