@@ -82,11 +82,18 @@ class UploadRecordingSerializer(serializers.ModelSerializer):
         return recording
 
 class SessionSerializer(serializers.ModelSerializer):
-    recording = RecordingSerializer()
+    recording = RecordingSerializer(read_only=True)
 
     class Meta:
         model = Session
         fields = ['id', 'campaign', 'title', 'date_played', 'description', 'created_at', 'recording']
+
+    def validate_campaign(self, campaign):
+        request = self.context.get('request')
+        if request and not request.user.is_staff:
+            if campaign.subscription.user != request.user:
+                raise serializers.ValidationError("You do not have permission to assign this campaign.")
+        return campaign
 
 class CampaignSerializer(serializers.ModelSerializer):
     class Meta:

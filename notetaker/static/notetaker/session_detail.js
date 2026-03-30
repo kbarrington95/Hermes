@@ -10,6 +10,8 @@ const sessionId = window.location.pathname.split('/').filter(Boolean).pop();
 
 let summaryId = null;
 let summaryRawContent = '';
+let currentCampaignId = null;
+let currentCampaignName = '';
 
 async function loadSession() {
     const res = await fetch(`/notetaker/sessions/${sessionId}/`, { headers });
@@ -20,6 +22,16 @@ async function loadSession() {
     document.getElementById('session-title').textContent = session.title;
     document.getElementById('session-date').textContent = session.date_played;
     document.title = `${session.title} — Hermes`;
+
+    currentCampaignId = session.campaign;
+
+    // Fetch campaign name for display
+    const campRes = await fetch(`/notetaker/campaigns/${session.campaign}/`, { headers });
+    if (campRes.ok) {
+        const camp = await campRes.json();
+        currentCampaignName = camp.name;
+        document.getElementById('session-campaign-name').textContent = camp.name;
+    }
 
     // Back link to campaign detail
     document.getElementById('back-link').href = `/notetaker/campaign/${session.campaign}/`;
@@ -95,8 +107,25 @@ async function loadSummary(transcriptionId) {
 }
 
 // ── Session title edit ──────────────────────────────────────
-function startSessionEdit() {
+async function startSessionEdit() {
     document.getElementById('edit-title').value = document.getElementById('session-title').textContent;
+
+    // Populate campaign dropdown
+    const select = document.getElementById('edit-campaign');
+    select.innerHTML = '';
+    const res = await fetch('/notetaker/campaigns/', { headers });
+    if (res.ok) {
+        const data = await res.json();
+        const campaigns = data.results ?? data;
+        campaigns.forEach(c => {
+            const opt = document.createElement('option');
+            opt.value = c.id;
+            opt.textContent = c.name;
+            if (c.id === currentCampaignId) opt.selected = true;
+            select.appendChild(opt);
+        });
+    }
+
     document.getElementById('session-view').style.display = 'none';
     document.getElementById('session-edit').style.display = 'block';
     document.getElementById('edit-session-btn').style.display = 'none';
@@ -117,16 +146,28 @@ async function saveSessionEdit() {
     const title = document.getElementById('edit-title').value.trim();
     if (!title) { alert('Title is required.'); return; }
 
+    const selectedCampaignId = parseInt(document.getElementById('edit-campaign').value);
+
     const res = await fetch(`/notetaker/sessions/${sessionId}/`, {
         method: 'PATCH',
         headers,
-        body: JSON.stringify({ title }),
+        body: JSON.stringify({ title, campaign: selectedCampaignId }),
     });
     if (!res.ok) { alert('Failed to save. Please try again.'); return; }
 
     const updated = await res.json();
     document.getElementById('session-title').textContent = updated.title;
     document.title = `${updated.title} — Hermes`;
+
+    // Update campaign display and back link if it changed
+    if (selectedCampaignId !== currentCampaignId) {
+        currentCampaignId = selectedCampaignId;
+        const selectedOption = document.getElementById('edit-campaign').selectedOptions[0];
+        currentCampaignName = selectedOption.textContent;
+        document.getElementById('session-campaign-name').textContent = currentCampaignName;
+        document.getElementById('back-link').href = `/notetaker/campaign/${currentCampaignId}/`;
+    }
+
     cancelSessionEdit();
 }
 
