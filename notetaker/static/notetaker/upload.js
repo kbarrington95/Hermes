@@ -12,19 +12,37 @@ const preselectedCampaign = params.get('campaign');
 
 // ── Load campaigns into dropdown ─────────────────────────────
 
+let campaignData = [];
+
 async function loadCampaigns() {
     const res = await fetch('/notetaker/campaigns/', { headers: jsonHeaders });
     if (!res.ok) return;
 
     const data = await res.json();
-    const campaigns = data.results ?? data;
+    campaignData = data.results ?? data;
     const select = document.getElementById('campaign-select');
 
     select.innerHTML = '<option value="">Select a campaign…</option>' +
-        campaigns.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+        campaignData.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
 
-    if (preselectedCampaign) select.value = preselectedCampaign;
+    if (preselectedCampaign) {
+        select.value = preselectedCampaign;
+        autofillSessionTitle();
+    }
 }
+
+function autofillSessionTitle() {
+    const select = document.getElementById('campaign-select');
+    const titleInput = document.getElementById('session-title');
+    const campaign = campaignData.find(c => c.id === parseInt(select.value));
+    if (!campaign) return;
+
+    const today = new Date().toISOString().split('T')[0];
+    const nextSession = (campaign.sessions_count ?? 0) + 1;
+    titleInput.value = `${campaign.name} - Session #${nextSession} - ${today}`;
+}
+
+document.getElementById('campaign-select').addEventListener('change', autofillSessionTitle);
 
 // ── Step state helpers ───────────────────────────────────────
 
