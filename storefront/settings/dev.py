@@ -1,4 +1,6 @@
 from .common import *
+import requests as _requests
+import time as _time
 
 load_dotenv()
 DEBUG = True
@@ -9,7 +11,23 @@ GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 
 # The leading dot is a wildcard for any ngrok subdomain.
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0', '.ngrok-free.app']
-WEBHOOK_BASE_URL = "https://6fa9-107-209-248-174.ngrok-free.app"
+
+
+def _get_ngrok_url():
+    # Try Docker service name first, then localhost fallback
+    for host in ('ngrok', 'localhost'):
+        for _ in range(10):
+            try:
+                resp = _requests.get(f'http://{host}:4040/api/tunnels', timeout=2)
+                for tunnel in resp.json().get('tunnels', []):
+                    if tunnel['proto'] == 'https':
+                        return tunnel['public_url']
+            except Exception:
+                _time.sleep(1)
+    return None
+
+
+WEBHOOK_BASE_URL = _get_ngrok_url()
 
 
 DATABASES = {

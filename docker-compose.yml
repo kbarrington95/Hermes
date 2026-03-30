@@ -7,6 +7,7 @@ services:
     depends_on:
       - redis
       - mysql
+      - ngrok
     restart: on-failure
     volumes:
       - .:/app
@@ -40,6 +41,7 @@ services:
     command: celery -A storefront worker --loglevel=info
     depends_on:
       - redis
+      - ngrok
     volumes:
       - .:/app
     env_file:
@@ -49,6 +51,7 @@ services:
     command: celery -A storefront beat --loglevel=info
     depends_on:
       - redis
+      - ngrok
     volumes:
       - .:/app
     env_file:
@@ -96,4 +99,3 @@ volumes:
 networks:
   default:
     enable_ipv6: false
-
