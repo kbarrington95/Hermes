@@ -50,11 +50,14 @@ def process_transcription(recording_id):
         return f"Submission failed: {str(e)}"
 
 
-@shared_task
-def process_summary(transcription_id):
+@shared_task(bind=True, max_retries=5)
+def process_summary(self, transcription_id):
     """
-    Background task to generate a D&D session summary using Gemini 
+    Background task to generate a D&D session summary using Gemini
     and save it to the database.
+
+    Retries up to 5 times with exponential backoff on transient
+    Gemini 503 / UNAVAILABLE errors.
     """
     try:
         # 1. Fetch the exact transcription object
@@ -62,18 +65,34 @@ def process_summary(transcription_id):
 
         # 2. Call the Gemini Service using the raw text
         summary_text = GeminiService.generate_dnd_summary(transcription.raw_text)
-        
+
         # 3. Create the Summary record
         Summary.objects.create(
             transcription=transcription,
             model_used='gemini',
-            summary_type='dnd_session', 
+            summary_type='dnd_session',
             content=summary_text
         )
-        
+
         return f"Successfully summarized transcription {transcription_id}"
 
     except Transcription.DoesNotExist:
         return f"Error: Transcription {transcription_id} not found."
     except Exception as e:
-        return f"Summarization failed: {str(e)}"
+        error_msg = str(e)
+        is_transient = (
+            "503" in error_msg
+            or "UNAVAILABLE" in error_msg
+            or "high traffic" in error_msg.lower()
+        )
+
+        if is_transient:
+            try:
+                raise self.retry(exc=e, countdown=2 ** self.request.retries)
+            except self.MaxRetriesExceededError:
+                return (
+                    f"Summarization failed after {self.max_retries} retries "
+                    f"(transient error): {error_msg}"
+                )
+
+        return f"Summarization failed: {error_msg}"

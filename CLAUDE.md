@@ -8,7 +8,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 # Install dependencies
 pipenv install
 
-# Run development server
+# Run development server (Docker — includes MySQL, Redis, Celery, Flower, ngrok)
+docker compose up
+
+# Run development server (without Docker)
 python manage.py runserver
 
 # Run all tests
@@ -50,12 +53,18 @@ python manage.py migrate
 - **AssemblyAI API key** loaded from `.env` as `ASSEMBLYAI_API_KEY`
 - **Auth endpoints:** `/auth/` (djoser), JWT tokens at `/auth/jwt/create/`, `/auth/jwt/refresh/`
 - **Debug toolbar:** enabled in development at `/__debug__/`
+- **ngrok:** runs as a Docker service. `WEBHOOK_BASE_URL` in `dev.py` is set dynamically at startup by querying `http://ngrok:4040/api/tunnels` — never hardcoded.
+- **ngrok:** runs as a Docker service. `WEBHOOK_BASE_URL` in `dev.py` is set dynamically at startup by querying `http://ngrok:4040/api/tunnels` — never hardcoded.
 
 ## Notetaker Domain Details
 
 The `notetaker/` app has a service layer (`services.py`) that wraps AssemblyAI SDK calls. Custom vocabulary (`CustomVocabulary` model) supplies D&D-specific word boosts (character names, locations) to improve transcription accuracy. Speaker labels are enabled by default.
 
 `Summary` supports multiple summary types per transcription. Subscription quota fields track `audio_minutes_used` and `summaries_generated` against monthly limits.
+
+`Recording.duration_seconds` is populated at upload time using `mutagen` — reads the MP3 header in-memory before the file is written to storage. See `docs/mutagen-recording-duration.md` for details and the future quota enforcement hook.
+
+Sessions can be reassigned to a different campaign via `PATCH /notetaker/sessions/{id}/` with `{ "campaign": <id> }`. The serializer validates the user owns the target campaign.
 
 ## URL Structure
 
@@ -75,6 +84,7 @@ annotated-types               0.7.0
 anyio                         4.12.1
 asgiref                       3.11.1
 assemblyai                    0.52.0
+mutagen                       1.47.0
 certifi                       2026.1.4
 cffi                          2.0.0
 charset-normalizer            3.4.4

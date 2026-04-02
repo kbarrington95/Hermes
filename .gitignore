@@ -17,6 +17,7 @@ media/
 #Other
 SQL SeedFiles/
 frontendMVP.md
+mutagen-recording-duration.md
 
 #Testing
 pytest.ini

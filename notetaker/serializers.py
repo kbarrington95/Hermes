@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from django.utils import timezone
+from mutagen.mp3 import MP3
 from .models import Campaign, Session, Recording, Transcription, Summary, CustomVocabulary, Subscription
 
 class CustomVocabularySerializer(serializers.ModelSerializer):
@@ -59,11 +60,20 @@ class UploadRecordingSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         campaign = validated_data.pop('session')['campaign'] # Extracted from source mapping
         date_played = validated_data.pop('date', timezone.now().date())
-        
+
         # Default title logic: "Session - YYYY-MM-DD"
         default_title = f"Session - {date_played}"
         title = validated_data.pop('title', default_title)
         audio_file = validated_data.pop('audio_file')
+
+        # Read duration from in-memory file before S3 write
+        duration_seconds = None
+        try:
+            audio = MP3(audio_file)
+            duration_seconds = int(audio.info.length)
+        except Exception:
+            pass
+        audio_file.seek(0)
 
         # Create the Session first
         session = Session.objects.create(
@@ -76,9 +86,10 @@ class UploadRecordingSerializer(serializers.ModelSerializer):
         recording = Recording.objects.create(
             session=session,
             audio_file=audio_file,
-            **validated_data # Catch any other fields like duration if passed
+            duration_seconds=duration_seconds,
+            **validated_data
         )
-        
+
         return recording
 
 class SessionSerializer(serializers.ModelSerializer):
